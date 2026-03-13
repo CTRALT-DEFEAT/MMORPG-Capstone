@@ -101,10 +101,6 @@
 
 
 # POSSIBLE ADDONS:
-
-1. combat stats 
-    * ie how many times each mob has been killed, 
-      how many kills each character has on each mob?
 2. Character reputation 
     * npc dependent 
     * changes on npc trades or kills?
