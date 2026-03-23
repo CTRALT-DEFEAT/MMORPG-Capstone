@@ -1,6 +1,6 @@
 # MMORPG-Capstone
 
 ## The ERD
-![ERD](/docs/ERD.png)
+![ERD](/docs/ERD/ERD.png)
 
 
