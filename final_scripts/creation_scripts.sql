@@ -1,38 +1,85 @@
+DROP DATABASE IF EXISTS capstone_mmorpg;
+
+CREATE DATABASE IF NOT EXISTS capstone_mmorpg;
+
+USE capstone_mmorpg;
+
+
+DROP TABLE IF EXISTS member_activity;
+DROP TABLE IF EXISTS member_history;
+DROP TABLE IF EXISTS roles;
+DROP TABLE IF EXISTS guild_members;
+DROP TABLE IF EXISTS guilds; 
+DROP TABLE IF EXISTS trade_items;
+DROP TABLE IF EXISTS trade_participants;
+DROP TABLE IF EXISTS trades;
+DROP TABLE IF EXISTS quest_history;
+DROP TABLE IF EXISTS quest_rewards;
+DROP TABLE IF EXISTS quest_prerequisites;
+DROP TABLE IF EXISTS quests;
+DROP TABLE IF EXISTS npc_dialogs;
+DROP TABLE IF EXISTS dialogs;
+DROP TABLE IF EXISTS npc_role_map;
+DROP TABLE IF EXISTS npc_roles;
+DROP TABLE IF EXISTS npcs;
+DROP TABLE IF EXISTS zones;
+DROP TABLE IF EXISTS regions;
+DROP TABLE IF EXISTS item_restrictions;
+DROP TABLE IF EXISTS restrictions;
+DROP TABLE IF EXISTS equipped_items;
+DROP TABLE IF EXISTS inventory_items;
+DROP TABLE IF EXISTS inventories;
+DROP TABLE IF EXISTS items;
+DROP TABLE IF EXISTS character_stats;
+DROP TABLE IF EXISTS character_info;
+DROP TABLE IF EXISTS characters;
+DROP TABLE IF EXISTS accounts;
+DROP TABLE IF EXISTS class_specialization;
+DROP TABLE IF EXISTS slots;
+DROP TABLE IF EXISTS stats;
+DROP TABLE IF EXISTS classes;
+DROP TABLE IF EXISTS specializations;
+DROP TABLE IF EXISTS classes;    
+DROP TABLE IF EXISTS races;
+
+
 # Core Lookup Tables
 
-CREATE TABLE races (
+CREATE TABLE IF NOT EXISTS races (
     race_id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
     race_name VARCHAR(50) NOT NULL UNIQUE
 );
 
-CREATE TABLE classes (
+CREATE TABLE IF NOT EXISTS classes (
     class_id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
     class_name VARCHAR(50) NOT NULL UNIQUE
 );
 
-CREATE TABLE specializations (
+CREATE TABLE IF NOT EXISTS specializations (
     specialization_id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
     specialization_name VARCHAR(50) NOT NULL UNIQUE
 );
 
-CREATE TABLE levels (
+CREATE TABLE IF NOT EXISTS levels (
     level_id INT UNSIGNED PRIMARY KEY,
     xp_required INT UNSIGNED NOT NULL
 );
 
-CREATE TABLE stats (
+CREATE TABLE IF NOT EXISTS stats (
     stat_id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
     stat_name VARCHAR(50) NOT NULL UNIQUE
 );
 
-CREATE TABLE slots (
+
+CREATE TABLE IF NOT EXISTS slots (
     slot_id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
     slot_name VARCHAR(50) NOT NULL UNIQUE
 );
 
+
 # Class Specialization
 
-CREATE TABLE class_specialization (
+CREATE TABLE IF NOT EXISTS class_specialization (
     class_id INT UNSIGNED,
     specialization_id INT UNSIGNED,
     PRIMARY KEY (class_id, specialization_id),
@@ -42,13 +89,13 @@ CREATE TABLE class_specialization (
 
 # Accounts and Characters
 
-CREATE TABLE accounts (
+CREATE TABLE IF NOT EXISTS accounts (
     account_id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
     username VARCHAR(50) NOT NULL UNIQUE,
     created_at DATETIME NOT NULL
 );
 
-CREATE TABLE characters (
+CREATE TABLE IF NOT EXISTS characters (
     character_id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
     name VARCHAR(50) NOT NULL,
     class_id INT UNSIGNED NOT NULL,
@@ -61,7 +108,7 @@ CREATE TABLE characters (
     FOREIGN KEY (level_id) REFERENCES levels(level_id) ON DELETE RESTRICT
 );
 
-CREATE TABLE character_info (
+CREATE TABLE IF NOT EXISTS character_info (
     character_id INT UNSIGNED PRIMARY KEY,
     account_id INT UNSIGNED NOT NULL,
     created_at DATETIME NOT NULL,
@@ -71,7 +118,8 @@ CREATE TABLE character_info (
 
 # Character Stats
 
-CREATE TABLE character_stats (
+
+CREATE TABLE IF NOT EXISTS character_stats (
     character_id INT UNSIGNED,
     stat_id INT UNSIGNED,
     value INT NOT NULL,
@@ -82,20 +130,20 @@ CREATE TABLE character_stats (
 
 # Items and Inventory
 
-CREATE TABLE items (
-    item_id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
-    item_name VARCHAR(100) NOT NULL,
-    sell_price DECIMAL(10,2),
-    max_durability INT UNSIGNED
+CREATE TABLE IF NOT EXISTS items (
+item_id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+item_name VARCHAR(100) NOT NULL,
+sell_price DECIMAL(10,2),
+max_durability INT UNSIGNED
 );
 
-CREATE TABLE inventories (
+CREATE TABLE IF NOT EXISTS inventories (
     inventory_id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
     character_id INT UNSIGNED NOT NULL,
     FOREIGN KEY (character_id) REFERENCES characters(character_id) ON DELETE CASCADE
 );
 
-CREATE TABLE inventory_items (
+CREATE TABLE IF NOT EXISTS inventory_items (
     inventory_id INT UNSIGNED,
     item_id INT UNSIGNED,
     quantity INT UNSIGNED DEFAULT 1,
@@ -104,7 +152,7 @@ CREATE TABLE inventory_items (
     FOREIGN KEY (item_id) REFERENCES items(item_id) ON DELETE CASCADE
 );
 
-CREATE TABLE equipped_items (
+CREATE TABLE IF NOT EXISTS equipped_items (
     character_id INT UNSIGNED,
     slot_id INT UNSIGNED,
     item_id INT UNSIGNED,
@@ -114,9 +162,10 @@ CREATE TABLE equipped_items (
     FOREIGN KEY (item_id) REFERENCES items(item_id) ON DELETE SET NULL
 );
 
+
 # Restriction System
 
-CREATE TABLE restrictions (
+CREATE TABLE IF NOT EXISTS restrictions (
     restriction_id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
     restriction_type ENUM('require','exclude') NOT NULL,
     min_level INT UNSIGNED,
@@ -128,7 +177,8 @@ CREATE TABLE restrictions (
     FOREIGN KEY (specialization_id) REFERENCES specializations(specialization_id) ON DELETE CASCADE
 );
 
-CREATE TABLE item_restrictions (
+
+CREATE TABLE IF NOT EXISTS item_restrictions (
     item_id INT UNSIGNED,
     restriction_id INT UNSIGNED,
     PRIMARY KEY (item_id, restriction_id),
@@ -138,31 +188,31 @@ CREATE TABLE item_restrictions (
 
 # WORLD (REGIONS / ZONES / NPCs)
 
-CREATE TABLE regions (
+CREATE TABLE IF NOT EXISTS regions (
     region_id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
     region_name VARCHAR(100)
 );
 
-CREATE TABLE zones (
+CREATE TABLE IF NOT EXISTS zones (
     zone_id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
     region_id INT UNSIGNED,
     zone_name VARCHAR(100),
     FOREIGN KEY (region_id) REFERENCES regions(region_id) ON DELETE CASCADE
 );
 
-CREATE TABLE npcs (
+CREATE TABLE IF NOT EXISTS npcs (
     npc_id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
     npc_name VARCHAR(100),
     zone_id INT UNSIGNED,
     FOREIGN KEY (zone_id) REFERENCES zones(zone_id) ON DELETE CASCADE
 );
 
-CREATE TABLE npc_roles (
+CREATE TABLE IF NOT EXISTS npc_roles (
     npc_role_id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
     role_name VARCHAR(50)
 );
 
-CREATE TABLE npc_role_map (
+CREATE TABLE IF NOT EXISTS npc_role_map (
     npc_id INT UNSIGNED,
     npc_role_id INT UNSIGNED,
     PRIMARY KEY (npc_id, npc_role_id),
@@ -172,12 +222,12 @@ CREATE TABLE npc_role_map (
 
 # Dialog System
 
-CREATE TABLE dialogs (
+CREATE TABLE IF NOT EXISTS dialogs (
     dialog_id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
     dialog_text TEXT NOT NULL
 );
 
-CREATE TABLE npc_dialogs (
+CREATE TABLE IF NOT EXISTS npc_dialogs (
     npc_id INT UNSIGNED,
     dialog_id INT UNSIGNED,
     PRIMARY KEY (npc_id, dialog_id),
@@ -186,14 +236,14 @@ CREATE TABLE npc_dialogs (
 );
 
 # Quest System
-  
-CREATE TABLE quests (
+
+CREATE TABLE IF NOT EXISTS quests (
     quest_id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
     quest_name VARCHAR(100),
     quest_description TEXT
 );
 
-CREATE TABLE quest_prerequisites (
+CREATE TABLE IF NOT EXISTS quest_prerequisites (
     quest_id INT UNSIGNED,
     required_quest_id INT UNSIGNED,
     PRIMARY KEY (quest_id, required_quest_id),
@@ -201,7 +251,8 @@ CREATE TABLE quest_prerequisites (
     FOREIGN KEY (required_quest_id) REFERENCES quests(quest_id) ON DELETE CASCADE
 );
 
-CREATE TABLE quest_rewards (
+
+CREATE TABLE IF NOT EXISTS quest_rewards (
     quest_id INT UNSIGNED,
     item_id INT UNSIGNED,
     xp_reward INT,
@@ -211,7 +262,8 @@ CREATE TABLE quest_rewards (
     FOREIGN KEY (item_id) REFERENCES items(item_id) ON DELETE SET NULL
 );
 
-CREATE TABLE quest_history (
+
+CREATE TABLE IF NOT EXISTS quest_history (
     character_id INT UNSIGNED,
     quest_id INT UNSIGNED,
     status ENUM('not_started','in_progress','completed'),
@@ -223,12 +275,14 @@ CREATE TABLE quest_history (
 
 # Trading System
 
-CREATE TABLE trades (
-    trade_id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
-    trade_time DATETIME NOT NULL
+
+CREATE TABLE IF NOT EXISTS trades (
+trade_id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+trade_time DATETIME NOT NULL
 );
 
-CREATE TABLE trade_participants (
+
+CREATE TABLE IF NOT EXISTS trade_participants (
     trade_id INT UNSIGNED,
     character_id INT UNSIGNED,
     PRIMARY KEY (trade_id, character_id),
@@ -236,7 +290,8 @@ CREATE TABLE trade_participants (
     FOREIGN KEY (character_id) REFERENCES characters(character_id) ON DELETE CASCADE
 );
 
-CREATE TABLE trade_items (
+
+CREATE TABLE IF NOT EXISTS trade_items (
     trade_id INT UNSIGNED,
     item_id INT UNSIGNED,
     sender_character_id INT UNSIGNED,
@@ -247,13 +302,17 @@ CREATE TABLE trade_items (
     FOREIGN KEY (sender_character_id) REFERENCES characters(character_id) ON DELETE CASCADE
 );
 
+
 # Guilds
-CREATE TABLE guilds (
+
+  
+CREATE TABLE IF NOT EXISTS guilds (
     guild_id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
     guild_name VARCHAR(100)
 );
 
-CREATE TABLE guild_members (
+
+CREATE TABLE IF NOT EXISTS guild_members (
     guild_id INT UNSIGNED,
     character_id INT UNSIGNED UNIQUE,
     PRIMARY KEY (guild_id, character_id),
@@ -261,12 +320,14 @@ CREATE TABLE guild_members (
     FOREIGN KEY (character_id) REFERENCES characters(character_id) ON DELETE CASCADE
 );
 
-CREATE TABLE roles (
+
+CREATE TABLE IF NOT EXISTS roles (
     role_id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
     role_name VARCHAR(50)
 );
 
-CREATE TABLE member_history (
+
+CREATE TABLE IF NOT EXISTS member_history (
     character_id INT UNSIGNED,
     role_id INT UNSIGNED,
     changed_at DATETIME,
@@ -275,7 +336,8 @@ CREATE TABLE member_history (
     FOREIGN KEY (role_id) REFERENCES roles(role_id) ON DELETE CASCADE
 );
 
-CREATE TABLE member_activity (
+
+CREATE TABLE IF NOT EXISTS member_activity (
     activity_id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
     character_id INT UNSIGNED,
     log_on DATETIME,
