@@ -259,7 +259,7 @@ CREATE TABLE IF NOT EXISTS quest_rewards (
     gold_reward DECIMAL(10,2),
     PRIMARY KEY (quest_id, item_id),
     FOREIGN KEY (quest_id) REFERENCES quests(quest_id) ON DELETE CASCADE,
-    FOREIGN KEY (item_id) REFERENCES items(item_id) ON DELETE SET NULL
+    FOREIGN KEY (item_id) REFERENCES items(item_id) ON DELETE CASCADE
 );
 
 
@@ -298,7 +298,7 @@ CREATE TABLE IF NOT EXISTS trade_items (
     gold_amount DECIMAL(10,2),
     PRIMARY KEY (trade_id, item_id, sender_character_id),
     FOREIGN KEY (trade_id) REFERENCES trades(trade_id) ON DELETE CASCADE,
-    FOREIGN KEY (item_id) REFERENCES items(item_id) ON DELETE SET NULL,
+    FOREIGN KEY (item_id) REFERENCES items(item_id) ON DELETE CASCADE,
     FOREIGN KEY (sender_character_id) REFERENCES characters(character_id) ON DELETE CASCADE
 );
 
