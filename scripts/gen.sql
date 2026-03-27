@@ -419,4 +419,14 @@ INSERT INTO npc_roles (
     name
 )
 VALUES
+    ('Gaurd'),
+    ('Blacksmith'),
+    ('Inn Keeper'),
+    ('Merchant'),
+    ('Mage'),
+    ('Archer'),
+    ('Hermit'),
+    ('Begger');
+
+
 
