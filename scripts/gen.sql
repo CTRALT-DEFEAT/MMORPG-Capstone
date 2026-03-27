@@ -1,4 +1,7 @@
 
+DROP PROCEDURE IF EXISTS random_zones;
+DROP PROCEDURE IF EXISTS random_factions;
+DROP PROCEDURE IF EXISTS random_equiped;
 DROP PROCEDURE IF EXISTS random_items;
 DROP PROCEDURE IF EXISTS random_item_info;
 DROP PROCEDURE IF EXISTS random_character_stats;
@@ -237,23 +240,52 @@ BEGIN
     END WHILE;
 END $$
 
-CREATE PROCEDURE IF NOT EXISTS random_factions (
-    IN num_of_factions INT
+CREATE PROCEDURE IF NOT EXISTS random_equiped( 
 )
 BEGIN
+    DECLARE num_of_characters INT;
+    DECLARE num_of_slots INT;
     DECLARE i INT DEFAULT 1;
-    DECLARE region_count INT;
-    SELECT COUNT(*) INTO region_count FROM regions;
+    DECLARE z INT DEFAULT 1;
+    DECLARE character_inv INT;
+    DECLARE slot_item INT;
+    SELECT COUNT(*) INTO num_of_characters
+    FROM characters;
+    SELECT COUNT(*) INTO num_of_slots
+    FROM slots;
 
-    WHILE i <= num_of_factions DO
-        INSERT INTO factions(
-            region_id,
-            name 
-        )
-        VALUES (
-            FLOOR(1 + RAND() * region_count),
-            CONCAT('Faction_' + i)
-        );
+    WHILE i <= num_of_characters DO
+        SET z = 1;
+
+        WHILE z <= num_of_slots DO
+            SELECT inventory_id 
+            INTO character_inv
+            FROM characters
+            WHERE character_id = i;
+
+            SELECT item_id INTO slot_item
+            FROM items
+            WHERE inventory_id = character_inv
+            ORDER BY RAND() LIMIT 1;
+            
+            INSERT INTO equipped_items(
+                character_id,
+                slot_id,
+                item_id
+            )
+            VALUES(
+                i,
+                z,
+                slot_item
+            );
+            UPDATE items
+            SET inventory_id = NULL
+            WHERE item_id = slot_item;
+            
+            SET slot_item = NULL;
+            SET z = z + 1;
+        END WHILE;
+        
         SET i = i + 1;
     END WHILE;
 END $$
@@ -385,10 +417,14 @@ VALUES
     ('legendary', 'e8e23c');
 
 CALL random_item_info(
-    250
+    500
 );
 CALL random_items (
-    1000
+    2500
+);
+
+CALL random_equiped(
+
 );
 
 INSERT INTO regions(name)
@@ -398,9 +434,6 @@ VALUES
     ('The Rift'),
     ('Garden City'),
     ('The End');
-
-
-
 
 INSERT INTO roles(
     name, 
@@ -427,6 +460,4 @@ VALUES
     ('Archer'),
     ('Hermit'),
     ('Begger');
-
-
 
