@@ -238,7 +238,7 @@ BEGIN
 END $$
 
 CREATE PROCEDURE IF NOT EXISTS random_factions (
-    IN num_of_factions
+    IN num_of_factions INT
 )
 BEGIN
     DECLARE i INT DEFAULT 1;
