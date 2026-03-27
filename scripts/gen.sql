@@ -1,5 +1,6 @@
 
 DROP PROCEDURE IF EXISTS random_zones;
+DROP PROCEDURE IF EXISTS new_chat;
 DROP PROCEDURE IF EXISTS random_factions;
 DROP PROCEDURE IF EXISTS random_equiped;
 DROP PROCEDURE IF EXISTS random_items;
@@ -288,6 +289,24 @@ BEGIN
         
         SET i = i + 1;
     END WHILE;
+END $$
+CREATE PROCEDURE IF NOT EXISTS new_chat(
+    IN chat_name VARCHAR(50),
+    IN chat_private BIT,
+    OUT out_id
+)
+BEGIN
+    INSERT INTO chats(
+        name, 
+        is_private
+    )
+    VALUES (
+        chat_name,
+        chat_private
+    );
+    SELECT chat_id INTO out_id
+    FROM chats
+    WHERE `name` = chat_name;
 END $$
 
 CREATE PROCEDURE IF NOT EXISTS random_zones (
