@@ -237,6 +237,26 @@ BEGIN
     END WHILE;
 END $$
 
+CREATE PROCEDURE IF NOT EXISTS random_factions (
+    IN num_of_factions
+)
+BEGIN
+    DECLARE i INT DEFAULT 1;
+    DECLARE region_count INT;
+    SELECT COUNT(*) INTO region_count FROM regions;
+
+    WHILE i <= num_of_factions DO
+        INSERT INTO factions(
+            region_id,
+            name 
+        )
+        VALUES (
+            FLOOR(1 + RAND() * region_count),
+            CONCAT('Faction_' + i)
+        );
+        SET i = i + 1;
+    END WHILE;
+END $$
 
 
 
@@ -250,10 +270,7 @@ END $$
 
 
 
-
-
-
-
+DELIMITER ;
 INSERT INTO races (name, description)
 VALUES
         ('Human', 'Youngest and most common race. basic.'),
@@ -358,3 +375,12 @@ CALL random_item_info(
 CALL random_items (
     1000
 );
+
+INSERT INTO regions(name)
+VALUES
+    ('Feywild'),
+    ('Gondor'),
+    ('The Rift'),
+    ('Garden City'),
+    ('The End');
+
