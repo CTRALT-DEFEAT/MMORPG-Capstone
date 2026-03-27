@@ -403,11 +403,20 @@ VALUES
 
 
 INSERT INTO roles(
-    name, can_invite, can_kick, can_edit_roles, can_edit_motd
+    name, 
+    can_invite, 
+    can_kick, 
+    can_edit_roles, 
+    can_edit_motd
     )
 VALUES
     ('rookie', 0, 0, 0, 0),
     ('member', 1, 0, 0, 0),
     ('officer', 1, 1, 0, 1),
     ('leader', 1, 1, 1, 1);
+
+INSERT INTO npc_roles (
+    name
+)
+VALUES
 
