@@ -276,7 +276,7 @@ VALUES
         ('Human', 'Youngest and most common race. basic.'),
         ('Elf', 'Coolest race, good with magic and stuff, pick this if your cool.'),
         ('Orc', 'ugly and dumb.'),
-        ('Dwarf', 'Short, Ugly, nd Smart.'),
+        ('Dwarf', 'Short, Ugly, and Smart.'),
         ('Goblin', 'Short, Ugly, and Dumb'),
         ('Dragonborn', 'Human with dragon blood, very wise'),
         ('Halfling', 'Short, but not too short.'),
@@ -383,4 +383,16 @@ VALUES
     ('The Rift'),
     ('Garden City'),
     ('The End');
+
+
+
+
+INSERT INTO roles(
+    name, can_invite, can_kick, can_edit_roles, can_edit_motd
+    )
+VALUES
+    ('rookie', 0, 0, 0, 0),
+    ('member', 1, 0, 0, 0),
+    ('officer', 1, 1, 0, 1),
+    ('leader', 1, 1, 1, 1);
 
