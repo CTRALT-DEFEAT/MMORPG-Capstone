@@ -258,10 +258,24 @@ BEGIN
     END WHILE;
 END $$
 
+CREATE PROCEDURE IF NOT EXISTS random_zones (
+    IN region INT,
+    IN num_of_zones INT
+)
+BEGIN
+    DECLARE i INT DEFAULT 1;
 
-
-
-
+    WHILE i <= num_of_zones DO
+        INSERT INTO zones(
+            region_id,
+            name    
+        )
+        VALUES (
+            region,
+            CONCAT('Zone', i)
+        );
+    END WHILE;
+END $$
 
 
 
@@ -271,6 +285,7 @@ END $$
 
 
 DELIMITER ;
+
 INSERT INTO races (name, description)
 VALUES
         ('Human', 'Youngest and most common race. basic.'),
