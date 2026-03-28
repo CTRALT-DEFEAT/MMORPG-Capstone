@@ -1,4 +1,5 @@
 
+DROP PROCEDURE IF EXISTS chat_filters;
 DROP PROCEDURE IF EXISTS random_zones;
 DROP PROCEDURE IF EXISTS new_chat;
 DROP PROCEDURE IF EXISTS random_factions;
@@ -322,7 +323,7 @@ BEGIN
     FROM chats;
     SELECT COUNT(*) INTO num_of_filters
     FROM filters;
-    
+
     WHILE i <= num_of_chats DO
         SET z = 1;
         SELECT is_private INTO prvt_chat FROM chats
@@ -344,6 +345,8 @@ BEGIN
         SET i = i + 1;
     END WHILE;
 END $$
+
+
 
 CREATE PROCEDURE IF NOT EXISTS random_zones (
     IN region INT,
