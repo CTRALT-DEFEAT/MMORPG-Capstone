@@ -293,7 +293,7 @@ END $$
 CREATE PROCEDURE IF NOT EXISTS new_chat(
     IN chat_name VARCHAR(50),
     IN chat_private BIT,
-    OUT out_id
+    OUT out_id INT
 )
 BEGIN
     INSERT INTO chats(
