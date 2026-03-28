@@ -5,7 +5,6 @@ DROP PROCEDURE IF EXISTS random_guilds;
 DROP PROCEDURE IF EXISTS chat_filters;
 DROP PROCEDURE IF EXISTS random_zones;
 DROP PROCEDURE IF EXISTS new_chat;
-DROP PROCEDURE IF EXISTS random_factions;
 DROP PROCEDURE IF EXISTS random_equiped;
 DROP PROCEDURE IF EXISTS random_items;
 DROP PROCEDURE IF EXISTS random_item_info;
@@ -634,13 +633,25 @@ CALL random_equiped(
 
 );
 
-INSERT INTO regions(name)
+INSERT INTO regions(
+    name
+)
 VALUES
     ('Feywild'),
     ('Gondor'),
     ('The Rift'),
     ('Garden City'),
     ('The End');
+INSERT INTO factions(
+    region_id,
+    name
+)
+VALUES
+    (1, 'Night Fae Covenant'),
+    (2, 'Gondor Knights'),
+    (3, 'Voidlings'),
+    (4, 'Shoppers'),
+    (5, 'the Order of the Stone');
 
 INSERT INTO roles(
     name, 
