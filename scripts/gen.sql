@@ -1,4 +1,5 @@
 
+DROP PROCEDURE IF EXISTS random_guild_members;
 DROP PROCEDURE IF EXISTS random_guilds;
 DROP PROCEDURE IF EXISTS chat_filters;
 DROP PROCEDURE IF EXISTS random_zones;
@@ -355,13 +356,14 @@ CREATE PROCEDURE IF NOT EXISTS random_guilds(
 BEGIN
     DECLARE i INT DEFAULT 1;
     DECLARE z INT DEFAULT 1;
+    DECLARE max_members INT;
     DECLARE num_of_roles INT;
     SELECT COUNT(*) INTO num_of_roles
     FROM roles;
 
     WHILE i <= num_of_guilds DO
         SET z = 1;
-        
+        SET max_members = 15 + FLOOR(1 + RAND() * 45);
         CALL random_datetime(
             start_date, end_date, @guild_date
         );
@@ -372,16 +374,18 @@ BEGIN
         );
 
         INSERT INTO guilds(
+            guild_id,
             chat_id,
             creation_date,
             motd,
             member_limit
         )
         VALUES(
+            i,
             @new_chat_id,
             @guild_date,
             NULL,
-            15 + FLOOR(1 + RAND() * 45)
+            max_members
         );
 
         WHILE z <= num_of_guilds DO
@@ -396,6 +400,41 @@ BEGIN
             SET z = z + 1;
         END WHILE;
 
+        CALL random_guild_members(
+            i,
+            max_members
+        );
+        SET i = i + 1;
+    END WHILE;
+END $$
+
+CREATE PROCEDURE IF NOT EXISTS random_guild_members(
+    IN new_guild_id INT,
+    IN num_of_members INT
+)
+BEGIN
+    DECLARE i INT DEFAULT 1;
+    DECLARE cur_member INT;
+    SET num_of_members 
+    = num_of_members - FLOOR(RAND() * 15);
+
+    WHILE i <= num_of_members DO
+        SELECT character_id INTO cur_member
+        FROM characters
+        WHERE character_id NOT IN(
+            SELECT character_id
+            FROM guild_members
+        )
+        ORDER BY RAND() LIMIT 1;
+
+        INSERT INTO guild_members(
+            guild_id,
+            character_id
+        )
+        VALUES(
+            new_guild_id,
+            cur_member
+        );
         SET i = i + 1;
     END WHILE;
 END $$
