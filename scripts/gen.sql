@@ -1,4 +1,5 @@
 
+DROP PROCEDURE IF EXISTS random_guilds;
 DROP PROCEDURE IF EXISTS chat_filters;
 DROP PROCEDURE IF EXISTS random_zones;
 DROP PROCEDURE IF EXISTS new_chat;
@@ -346,6 +347,40 @@ BEGIN
     END WHILE;
 END $$
 
+CREATE PROCEDURE IF NOT EXISTS random_guilds(
+    IN num_of_guilds INT,
+    IN start_date DATETIME,
+    IN end_date DATETIME
+)
+BEGIN
+    DECLARE i INT DEFAULT 1;
+
+    WHILE i <= num_of_guilds DO
+        CALL random_datetime(
+            start_date, end_date, @guild_date
+        );
+        CALL new_chat(
+            CONCAT('guild_', i, ' chat'),
+            0,
+            @new_chat_id
+        );
+
+        INSERT INTO guilds(
+            chat_id,
+            creation_date,
+            motd,
+            member_limit
+        )
+        VALUES(
+            @new_chat_id,
+            @guild_date,
+            NULL,
+            15 + FLOOR(1 + RAND() * 45)
+        );
+
+        SET i = i + 1;
+    END WHILE;
+END $$
 
 
 CREATE PROCEDURE IF NOT EXISTS random_zones (
