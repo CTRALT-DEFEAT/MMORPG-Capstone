@@ -653,6 +653,12 @@ VALUES
     (4, 'Shoppers'),
     (5, 'the Order of the Stone');
 
+CALL random_zones(1, 21);
+CALL random_zones(2, 18);
+CALL random_zones(3, 28);
+CALL random_zones(4, 15);
+CALL random_zones(5, 32);
+
 INSERT INTO roles(
     name, 
     can_invite, 
