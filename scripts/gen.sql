@@ -311,7 +311,7 @@ BEGIN
     WHERE `name` = chat_name;
 END $$
 
-CREATE PROCEDURE IF NOT EXISTS chat_filters(
+CREATE PROCEDURE IF NOT EXISTS gen_chat_filters(
     
 )
 BEGIN
@@ -354,8 +354,14 @@ CREATE PROCEDURE IF NOT EXISTS random_guilds(
 )
 BEGIN
     DECLARE i INT DEFAULT 1;
+    DECLARE z INT DEFAULT 1;
+    DECLARE num_of_roles INT;
+    SELECT COUNT(*) INTO num_of_roles
+    FROM roles;
 
     WHILE i <= num_of_guilds DO
+        SET z = 1;
+        
         CALL random_datetime(
             start_date, end_date, @guild_date
         );
@@ -378,10 +384,21 @@ BEGIN
             15 + FLOOR(1 + RAND() * 45)
         );
 
+        WHILE z <= num_of_guilds DO
+            INSERT INTO guild_roles(
+                guild_id,
+                role_id
+            )
+            VALUES(
+                i,
+                z
+            );
+            SET z = z + 1;
+        END WHILE;
+
         SET i = i + 1;
     END WHILE;
 END $$
-
 
 CREATE PROCEDURE IF NOT EXISTS random_zones (
     IN region INT,
