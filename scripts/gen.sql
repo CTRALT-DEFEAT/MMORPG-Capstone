@@ -415,6 +415,7 @@ CREATE PROCEDURE IF NOT EXISTS random_guild_members(
 BEGIN
     DECLARE i INT DEFAULT 1;
     DECLARE cur_member INT;
+    DECLARE member_role INT;
     SET num_of_members 
     = num_of_members - FLOOR(RAND() * 15);
 
@@ -427,16 +428,29 @@ BEGIN
         )
         ORDER BY RAND() LIMIT 1;
 
+        IF RAND() > 0.95 THEN
+            SET member_role = 3;
+        ELSEIF RAND() > 0.38 THEN
+            SET member_role = 2;
+        ELSE
+            SET member_role = 1;
+        END IF;
+
         INSERT INTO guild_members(
+            role_id
             guild_id,
             character_id
         )
         VALUES(
+            member_role,
             new_guild_id,
             cur_member
         );
         SET i = i + 1;
     END WHILE;
+    UPDATE guild_members
+    SET role_id = 1
+    WHERE member_id = 1;
 END $$
 
 CREATE PROCEDURE IF NOT EXISTS random_zones (
