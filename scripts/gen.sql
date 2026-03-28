@@ -309,6 +309,42 @@ BEGIN
     WHERE `name` = chat_name;
 END $$
 
+CREATE PROCEDURE IF NOT EXISTS chat_filters(
+    
+)
+BEGIN
+    DECLARE i INT DEFAULT 1;
+    DECLARE z INT DEFAULT 1;
+    DECLARE num_of_chats INT;
+    DECLARE prvt_chat BIT;
+    DECLARE num_of_filters INT;
+    SELECT COUNT(*) INTO num_of_chats
+    FROM chats;
+    SELECT COUNT(*) INTO num_of_filters
+    FROM filters;
+    
+    WHILE i <= num_of_chats DO
+        SET z = 1;
+        SELECT is_private INTO prvt_chat FROM chats
+        WHERE chat_id = i;
+
+        IF prvt_chat = 0 THEN
+            WHILE z <= num_of_filters DO
+                INSERT INTO chat_filters(
+                    filter_id,
+                    chat_id
+                )
+                VALUES(
+                    z,
+                    i
+                );
+                SET z = z + 1;
+            END WHILE;
+        END IF;
+        SET i = i + 1;
+    END WHILE;
+END $$
+
 CREATE PROCEDURE IF NOT EXISTS random_zones (
     IN region INT,
     IN num_of_zones INT
