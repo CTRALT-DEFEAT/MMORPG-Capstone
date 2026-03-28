@@ -269,7 +269,7 @@ CREATE TABLE IF NOT EXISTS message_history (
 CREATE TABLE IF NOT EXISTS guilds (
     guild_id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
     chat_id INT UNSIGNED UNIQUE,
-    creatoin_date DATETIME,
+    creation_date DATETIME,
     motd TINYTEXT,
     member_limit TINYINT UNSIGNED,
 

@@ -1,4 +1,5 @@
 
+DROP PROCEDURE IF EXISTS random_member_activity;
 DROP PROCEDURE IF EXISTS random_guild_members;
 DROP PROCEDURE IF EXISTS random_guilds;
 DROP PROCEDURE IF EXISTS chat_filters;
@@ -388,7 +389,7 @@ BEGIN
             max_members
         );
 
-        WHILE z <= num_of_guilds DO
+        WHILE z <= num_of_roles DO
             INSERT INTO guild_roles(
                 guild_id,
                 role_id
@@ -408,18 +409,53 @@ BEGIN
     END WHILE;
 END $$
 
+CREATE PROCEDURE random_member_activity (
+    IN num_of_history INT,
+    IN mem_id INT,
+    IN char_id INT
+)
+BEGIN
+    DECLARE i INT DEFAULT 1;
+    DECLARE start_date DATETIME;
+
+    SELECT creation_date INTO start_date 
+    FROM character_info
+    WHERE character_id = char_id;
+
+    WHILE i <= num_of_history DO
+        CALL random_datetime(
+            start_date,
+            NOW(),
+            @log_on
+        );
+        INSERT INTO member_activity(
+            member_id,
+            `day`,
+            time_played
+        )
+        VALUES(
+            mem_id,
+            @log_on,
+            SEC_TO_TIME(FLOOR(RAND() * 82800))
+        );
+        SET i = i + 1;
+    END WHILE;
+END $$
+
 CREATE PROCEDURE IF NOT EXISTS random_guild_members(
     IN new_guild_id INT,
     IN num_of_members INT
 )
 BEGIN
     DECLARE i INT DEFAULT 1;
+    DECLARE member_PK INT;
     DECLARE cur_member INT;
     DECLARE member_role INT;
     SET num_of_members 
     = num_of_members - FLOOR(RAND() * 15);
 
     WHILE i <= num_of_members DO
+        SET cur_member = NULL;
         SELECT character_id INTO cur_member
         FROM characters
         WHERE character_id NOT IN(
@@ -427,8 +463,10 @@ BEGIN
             FROM guild_members
         )
         ORDER BY RAND() LIMIT 1;
-
-        IF RAND() > 0.95 THEN
+        
+        IF i = 1 THEN
+            SET member_role = 4;
+        ELSEIF RAND() > 0.95 THEN
             SET member_role = 3;
         ELSEIF RAND() > 0.38 THEN
             SET member_role = 2;
@@ -437,7 +475,7 @@ BEGIN
         END IF;
 
         INSERT INTO guild_members(
-            role_id
+            role_id,
             guild_id,
             character_id
         )
@@ -446,11 +484,17 @@ BEGIN
             new_guild_id,
             cur_member
         );
+        SELECT member_id INTO member_PK
+        FROM guild_members
+        WHERE (character_id = cur_member) AND
+        (guild_id = new_guild_id);
+        CALL random_member_activity(
+            15,
+            member_PK,
+            cur_member
+        );
         SET i = i + 1;
     END WHILE;
-    UPDATE guild_members
-    SET role_id = 1
-    WHERE member_id = 1;
 END $$
 
 CREATE PROCEDURE IF NOT EXISTS random_zones (
@@ -610,6 +654,14 @@ VALUES
     ('member', 1, 0, 0, 0),
     ('officer', 1, 1, 0, 1),
     ('leader', 1, 1, 1, 1);
+
+CALL random_guilds(
+    100,
+    '2005-05-03 05:03:35',
+    NOW()
+);
+
+select * FROM guilds;
 
 INSERT INTO npc_roles (
     name
