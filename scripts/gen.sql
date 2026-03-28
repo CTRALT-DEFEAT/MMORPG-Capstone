@@ -515,12 +515,53 @@ BEGIN
     END WHILE;
 END $$
 
+CREATE PROCEDURE IF NOT EXISTS random_npcs (
+    IN num_of_npcs INT
+)
+BEGIN
+    DECLARE i INT DEFAULT 1;
+    DECLARE npc_zone INT;
+    DECLARE npc_role INT;
+    DEClARE npc_race INT;
+    DECLARE npc_killable BIT;
 
+    WHILE i <= num_of_npcs DO
 
+        SELECT zone_id INTO npc_zone
+        FROM zones
+        ORDER BY RAND()
+        LIMIT 1;
 
+        SELECT role_id INTO npc_role
+        FROM npc_roles
+        ORDER BY RAND()
+        LIMIT 1;
 
+        SELECT race_id INTO npc_race
+        FROM races
+        ORDER BY RAND()
+        LIMIT 1;
 
+        SET npc_killable = IF(RAND() > 0.6,1,0);
 
+        INSERT INTO npcs(
+            zone_id,
+            role_id,
+            race_id,
+            name,
+            killable
+        )
+        VALUES(
+            npc_zone,
+            npc_role,
+            npc_race,
+            CONCAT('npc_',i),
+            npc_killable
+        );
+
+        SET i = i + 1;
+    END WHILE;
+END $$
 
 DELIMITER ;
 
