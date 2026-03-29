@@ -715,7 +715,108 @@ CALL random_equiped(
 
 -- add chats
 
--- add filters
+INSERT INTO filters(
+    word,
+    filtered_word
+)
+VALUES
+    ('damn','d***'),
+    ('hell','h***'),
+    ('shit','s***'),
+    ('crap','c***'),
+    ('ass','a**'),
+    ('asshole','a******'),
+    ('bitch','b****'),
+    ('bastard','b******'),
+    ('dick','d***'),
+    ('piss','p***'),
+    ('fuck','f***'),
+    ('fucking','f******'),
+    ('fucked','f*****'),
+    ('motherfucker','m***********'),
+    ('bullshit','b*******'),
+    ('jackass','j******'),
+    ('dumbass','d******'),
+    ('shithead','s*******'),
+    ('dipshit','d******'),
+    ('horseshit','h********'),
+    ('smartass','s*******'),
+    ('badass','b******'),
+    ('shitface','s*******'),
+    ('asswipe','a*******'),
+    ('asshat','a******'),
+    ('shitstorm','s********'),
+    ('fuckface','f*******'),
+    ('fuckhead','f*******'),
+    ('clusterfuck','c**********'),
+    ('shitshow','s*******'),
+    ('assclown','a********'),
+    ('shitbag','s******'),
+    ('fuckboy','f******'),
+    ('shitfaced','s********'),
+    ('assface','a******'),
+    ('fuckup','f*****'),
+    ('shitload','s*******'),
+    ('assholeish','a*********'),
+    ('dickhead','d*******'),
+    ('fuckwad','f******'),
+    ('shitbrain','s********'),
+    ('assmonkey','a*********'),
+    ('shitlord','s*******'),
+    ('fuckstick','f********'),
+    ('asslicker','a*********'),
+    ('shitlicker','s*********'),
+    ('douche','d*****'),
+    ('douchebag','d********'),
+    ('dumbfuck','d*******'),
+    ('shitkicker','s*********'),
+    ('asskicker','a*********'),
+    ('fucknut','f******'),
+    ('shitheel','s*******'),
+    ('asshatery','a********'),
+    ('fuckery','f******'),
+    ('shitiness','s********'),
+    ('crappy','c*****'),
+    ('shitty','s*****'),
+    ('freaking','f*******'),
+    ('friggin','f******'),
+    ('dang','d***'),
+    ('bloodyhell','b*********'),
+    ('arse','a***'),
+    ('arsehole','a*******'),
+    ('bugger','b*****'),
+    ('bollocks','b*******'),
+    ('tosser','t*****'),
+    ('wanker','w*****'),
+    ('git','g**'),
+    ('numpty','n*****'),
+    ('twit','t***'),
+    ('prat','p***'),
+    ('knobhead','k*******'),
+    ('pillock','p******'),
+    ('sodoff','s*****'),
+    ('crud','c***'),
+    ('jerk','j***'),
+    ('moron','m****'),
+    ('idiot','i****'),
+    ('loser','l****'),
+    ('screwup','s******'),
+    ('dumb','d***'),
+    ('stupid','s*****'),
+    ('trash','t****'),
+    ('garbage','g******'),
+    ('nonsense','n*******'),
+    ('rubbish','r******'),
+    ('lame','l***'),
+    ('pathetic','p********'),
+    ('ridiculous','r*********'),
+    ('annoying','a*******'),
+    ('obnoxious','o********'),
+    ('gross','g****'),
+    ('yuck','y***'),
+    ('ugh','u**'),
+    ('bleh','b***'),
+    ('meh','m**');
 
 -- add chat_members
 
@@ -767,7 +868,6 @@ CALL random_guilds(
     NOW()
 );
 
--- add dialogs
 INSERT INTO dialogs(
     dialog_id,
     dialog
@@ -1301,8 +1401,6 @@ VALUES
     (98,1,'Deliver Food','Deliver food supplies',1,'VILLAGE8'),
     (99,1,'Clear Forest','Clear forest threats',1,'FOREST14'),
     (100,1,'Final Battle','Defeat the final boss',0,'BOSS0001');
-
--- add quests
 
 -- add loot_tables
 
