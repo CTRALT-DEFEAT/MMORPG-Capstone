@@ -2138,8 +2138,85 @@ BEGIN
     END WHILE;
 END $$
 
+CREATE PROCEDURE IF NOT EXISTS random_quest_history(
+    IN min_history INT,
+    IN max_history INT
+)
+BEGIN
+    DECLARE i INT DEFAULT 1;
+    DECLARE z INT DEFAULT 1;
+    DECLARE character_count INT;
+    DECLARE history_count INT;
+    DECLARE quest_state VARCHAR(8);
+    DECLARE quest INT;
+    SELECT COUNT(*) INTO character_count
+    FROM characters;
 
+    WHILE i <= character_count DO
+    
+        SET z = 1;
 
+        SET history_count =
+        FLOOR(min_history + RAND() * max_history);
+
+        WHILE z <= history_count DO
+
+            CALL random_datetime(
+                (
+                    SELECT creation_date
+                    FROM characters
+                    WHERE character_id = i
+                ),
+                NOW(),
+                @quest_time
+            );
+
+            IF RAND() > 0.89 THEN
+                SET quest_state = 'failed';
+            ELSEIF RAND() > 0.49 THEN
+                SET quest_state = 'accepted';
+            ELSE
+                SET quest_state = 'completed';
+            END IF;
+            SELECT q.quest_id INTO quest
+            FROM quests q
+            WHERE q.quest_id NOT IN(
+                SELECT qh.quest_id
+                FROM quest_history qh
+                JOIN quests q2 ON qh.quest_id = q2.quest_id
+                WHERE qh.character_id = i
+                    AND qh.state = 'completed'
+                    AND q2.repeatable = 0
+            )
+            ORDER BY RAND()
+            LIMIT 1;
+
+            INSERT INTO quest_history(
+                character_id,
+                quest_id,
+                reward_id,
+                state,
+                time
+            )
+            VALUES(
+                i,
+                quest,
+                (
+                    SELECT reward_id
+                    FROM quest_rewards
+                    WHERE quest_id = quest
+                ),
+                quest_state,
+                @quest_time
+            );
+
+            SET z = z + 1;
+        END WHILE;
+
+        SET i = i + 1;
+    END WHILE;
+
+END $$
 
 
 
