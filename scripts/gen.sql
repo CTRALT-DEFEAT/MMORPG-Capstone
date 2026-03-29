@@ -1,5 +1,6 @@
 
-DROP PROCEDURE IF EXISTS random_npcs
+DROP PROCEDURE IF EXISTS random_character_chats;
+DROP PROCEDURE IF EXISTS random_npcs;
 DROP PROCEDURE IF EXISTS random_member_activity;
 DROP PROCEDURE IF EXISTS random_guild_members;
 DROP PROCEDURE IF EXISTS random_guilds;
@@ -294,6 +295,72 @@ BEGIN
         SET i = i + 1;
     END WHILE;
 END $$
+
+CREATE PROCEDURE IF NOT EXISTS random_character_chats(
+    IN number_of_chats INT
+)
+BEGIN
+    DECLARE i INT DEFAULT 1;
+    DECLARE chat_member_1 INT;
+    DECLARE chat_member_2 INT;
+    DECLARE chat_name VARCHAR(50);
+
+    WHILE i <= number_of_chats DO
+        SET chat_member_1 = NULL;
+        SET chat_member_2 = NULL;
+
+        SELECT character_id INTO chat_member_1
+        FROM characters
+        ORDER BY RAND()
+        LIMIT 1;
+
+        SELECT character_id INTO chat_member_2
+        FROM characters
+        WHERE (character_id != chat_member_1)
+        AND character_id NOT IN(
+            SELECT character_id FROM chat_members
+            WHERE character_id = chat_member_1
+        )
+        ORDER BY RAND()
+        LIMIT 1;
+
+        SET chat_name =
+        CONCAT(
+            (
+                SELECT name 
+                FROM characters
+                WHERE character_id = chat_member_1
+            ),
+            '-',
+            (
+                SELECT name
+                FROM characters
+                WHERE character_id = chat_member_2
+            )
+        );
+        CALL new_chat(
+            chat_name,
+            1,
+            @new_chat_id
+        );
+
+        INSERT INTO chat_members(
+            chat_id,
+            character_id
+        )
+        VALUES
+            (@new_chat_id, chat_member_1),
+            (@new_chat_id, chat_member_2);
+        SET i = i + 1;
+    END WHILE;
+END $$
+
+
+
+
+
+
+
 CREATE PROCEDURE IF NOT EXISTS new_chat(
     IN chat_name VARCHAR(50),
     IN chat_private BIT,
