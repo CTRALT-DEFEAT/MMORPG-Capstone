@@ -1,7 +1,7 @@
 DROP DATABASE IF EXISTS capstone_mmorpg;
 CREATE DATABASE IF NOT EXISTS capstone_mmorpg;
 USE capstone_mmorpg;
-DROP TABLE IF EXISTS specialization_resctrictions;
+DROP TABLE IF EXISTS specialization_restrictions;
 DROP TABLE IF EXISTS item_restrictions;
 DROP TABLE IF EXISTS quest_restrictions;
 DROP TABLE IF EXISTS restrictions;
@@ -448,7 +448,7 @@ CREATE TABLE IF NOT EXISTS quest_history (
     character_id INT UNSIGNED,
     quest_id INT UNSIGNED,
     reward_id INT UNSIGNED,
-    state ENUM('complete','accepted','failed'),
+    state ENUM('completed','accepted','failed'),
     time DATETIME,
 
     FOREIGN KEY (character_id)
@@ -677,7 +677,15 @@ DROP PROCEDURE IF EXISTS random_character;
 DROP PROCEDURE IF EXISTS random_account_history;
 DROP PROCEDURE IF EXISTS random_account;
 DROP PROCEDURE IF EXISTS random_datetime;
-
+DROP PROCEDURE IF EXISTS gen_chat_filters;
+DROP PROCEDURE IF EXISTS gen_npc_dialog;
+DROP PROCEDURE IF EXISTS random_message_history;
+DROP PROCEDURE IF EXISTS random_loot_table;
+DROP PROCEDURE IF EXISTS random_loot_table_items;
+DROP PROCEDURE IF EXISTS random_quest_rewards;
+DROP PROCEDURE IF EXISTS random_quest_history;
+DROP PROCEDURE IF EXISTS random_mobs;
+DROP PROCEDURE IF EXISTS random_zone_mobs;
 DELIMITER $$
 CREATE PROCEDURE IF NOT EXISTS random_datetime(
     IN start_time DATETIME,
@@ -1086,7 +1094,7 @@ BEGIN
 
     WHILE i <= num_of_guilds DO
         SET z = 1;
-        SET max_members = 15 + FLOOR(1 + RAND() * 45);
+        SET max_members = 15 + FLOOR(1 + RAND() * 30);
         CALL random_datetime(
             start_date, end_date, @guild_date
         );
@@ -1349,10 +1357,10 @@ BEGIN
     DECLARE z INT DEFAULT 1;
     DECLARE chat_member INT;
     DECLARE chat_count INT;
-    DECLARE chat_message TINYINT;
+    DECLARE chat_message TINYTEXT;
     DECLARE num_of_history INT;
     SELECT COUNT(*) INTO chat_count
-    FROM chat_id;
+    FROM chats;
 
     CREATE TEMPORARY TABLE IF NOT EXISTS messages(
         message_id INT AUTO_INCREMENT PRIMARY KEY,
@@ -1389,7 +1397,7 @@ BEGIN
         ('Anyone want to trade a mount for a pet?'),
         ('I finally found the legendary sword!'),
         ('Looking for a steady raid group for Friday nights.'),
-        ('What is the drop rate for the Skeleton King’s crown?'),
+        ('What is the drop rate for the Skeleton King`s crown?'),
         ('Be careful, the guards here are aggressive.'),
         ('WTS [Heavy Leather] bulk stacks.'),
         ('Who is the best healer class right now?'),
@@ -1447,7 +1455,7 @@ BEGIN
         ('LFM for the world boss, invite for auto-accept.'),
         ('The new patch notes look promising.'),
         ('WTS [Enchanted Dust] - pst for price.'),
-        ('How do I change my character’s appearance?'),
+        ('How do I change my character`s appearance?'),
         ('Looking for a high-level player to carry me.'),
         ('The dungeon loot was terrible this time.'),
         ('Anyone want to join a casual guild?'),
@@ -1480,7 +1488,7 @@ BEGIN
         ('LFM for the final boss of the expansion.'),
         ('The game balance seems a bit off lately.'),
         ('WTS [Health Stones] - cheap!'),
-        ('How do I start the "Hero’s Journey" quest?'),
+        ('How do I start the "Hero`s Journey" quest?'),
         ('Looking for a friendly guild for beginners.'),
         ('The mountain peak view is incredible.'),
         ('Anyone want to trade [Pet Food]?'),
@@ -1543,7 +1551,7 @@ BEGIN
         ('Looking for a group for the dungeon marathon.'),
         ('The trees are swaying in the wind.'),
         ('WTB [Exotic Spices] for cooking.'),
-        ('Anyone want to join my guild’s discord?'),
+        ('Anyone want to join my guild`s discord?'),
         ('I found a rare mount in the wild!'),
         ('LFM for the sky castle raid.'),
         ('The game updates are always exciting.'),
@@ -1601,7 +1609,7 @@ BEGIN
         ('Hey, check your mail, I sent those potions over.'),
         ('Wanna join our Discord? We are more active there.'),
         ('How did you get that title under your name?'),
-        ('Don''t go in there alone, the mobs are way too high level.'),
+        ('Don`t go in there alone, the mobs are way too high level.'),
         ('I have a spare key for the dungeon if you want to run it.'),
         ('Can you lend me a few gold for my mount? I am so close.'),
         ('Hey, I think your gear needs repairing.'),
@@ -1637,7 +1645,7 @@ BEGIN
         ('Hey, I have a quest to kill you in the arena, wanna help?'),
         ('Do you want to join our premade for the battlegrounds?'),
         ('Can you buff me before I head into the cave?'),
-        ('Hey, you dropped this! Just kidding, it''s soulbound.'),
+        ('Hey, you dropped this! Just kidding, it`s soulbound.'),
         ('Are you the guild leader or an officer?'),
         ('I finally got the mount! Look at this!'),
         ('Do you have any tips for a new player like me?'),
@@ -1712,7 +1720,7 @@ BEGIN
         ('Can you help me find the rare mount spawn?'),
         ('Do you want to join my party for the daily quest?'),
         ('Hey, I saw your character in a YouTube video!'),
-        ('Are you a fan of the game''s soundtrack?'),
+        ('Are you a fan of the game`s soundtrack?'),
         ('Can you tell me where to get the "Hero" title?'),
         ('Hey, I will trade you my [Iron Bars] for your [Gold Ore].'),
         ('Do you have any tips for the raiding scene?'),
@@ -1730,7 +1738,7 @@ BEGIN
         ('Can you help me get the achievement for the dungeon?'),
         ('Do you want to trade some [Rare Herbs]?'),
         ('Hey, I saw you in the world chat earlier.'),
-        ('Are you a fan of the game''s graphics?'),
+        ('Are you a fan of the game`s graphics?'),
         ('Can you tell me where to find the mount trainer?'),
         ('Hey, I will trade you my [Rare Daggers] for your [Rare Staff].'),
         ('Do you have any advice for the PvP battlegrounds?'),
@@ -1739,7 +1747,7 @@ BEGIN
         ('Can you help me find the entrance to the cave?'),
         ('Do you want to go on a treasure hunt with me?'),
         ('Hey, I have an extra pet if you want it.'),
-        ('Are you looking for a duel? I''m ready!'),
+        ('Are you looking for a duel? I`m ready!'),
         ('Can you show me your gear? It looks awesome.'),
         ('Hey, I think I just found a rare mount!'),
         ('Do you have any [Mana Oil] to spare?'),
@@ -1757,12 +1765,12 @@ BEGIN
         ('Can you help me find the rare spawn in the forest?'),
         ('Do you want to join my party for the weekend quest?'),
         ('Hey, I saw your character in a fan art piece!'),
-        ('Are you a fan of the game''s story?'),
+        ('Are you a fan of the game`s story?'),
         ('Can you tell me where to get the "Brave" title?'),
         ('Hey, I will trade you my [Silk Cloth] for your [Wool Cloth].'),
         ('Do you have any tips for the endgame content?'),
         ('Are you going to the arena for the finals?'),
-        ('Hey, I think your transmog is the best I''ve seen.'),
+        ('Hey, I think your transmog is the best I`ve seen.'),
         ('Can you help me find the hidden merchant?'),
         ('Do you want to join our group for the raid marathon?'),
         ('Hey, I found a secret passage in the castle!'),
@@ -1775,7 +1783,7 @@ BEGIN
         ('Can you help me get the achievement for the world event?'),
         ('Do you want to trade some [Rare Potions]?'),
         ('Hey, I saw you in the rankings for the arena!'),
-        ('Are you a fan of the game''s community?'),
+        ('Are you a fan of the game`s community?'),
         ('Can you tell me where to find the skill trainer?'),
         ('Hey, I will trade you my [Rare Shield] for your [Rare Sword].'),
         ('Do you have any advice for the raid mechanics?'),
@@ -2044,7 +2052,8 @@ BEGIN
     DECLARE i INT DEFAULT 1;
 
     WHILE num_of_tables <= i DO
-        INSERT INTO loot_table(
+
+        INSERT INTO loot_tables(
             min_gold,
             max_gold,
             min_exp,
@@ -2116,7 +2125,7 @@ BEGIN
     SELECT COUNT(*) INTO quest_count
     FROM quests;
 
-    WHILE i <= quest_count DO
+    WHILE i < quest_count DO
 
         INSERT INTO quest_rewards(
             item_id,
@@ -2149,7 +2158,7 @@ BEGIN
     DECLARE z INT DEFAULT 1;
     DECLARE character_count INT;
     DECLARE history_count INT;
-    DECLARE quest_state VARCHAR(8);
+    DECLARE quest_state VARCHAR(9);
     DECLARE quest INT;
     SELECT COUNT(*) INTO character_count
     FROM characters;
@@ -2165,7 +2174,7 @@ BEGIN
             CALL random_datetime(
                 (
                     SELECT creation_date
-                    FROM characters
+                    FROM character_info
                     WHERE character_id = i
                 ),
                 NOW(),
@@ -2297,8 +2306,6 @@ BEGIN
 END $$
 
 
-
-
 DELIMITER ;
 
 INSERT INTO races (name, description)
@@ -2380,7 +2387,7 @@ VALUES
         ('Trinket');
 
 CALL random_account(
-    500,
+    1000,
     NOW(),
     '2005-06-07 15:54:02',
     5,
@@ -2388,7 +2395,7 @@ CALL random_account(
 );
 
 CALL random_character(
-    1000
+    3000
 );
 
 INSERT INTO item_rarities(name, color)
@@ -3150,7 +3157,10 @@ CALL random_mobs(
     500
 );
 
--- add zone_mobs
+CALL random_zone_mobs(
+    3,
+    15
+);
 
 -- add player_trades
 
