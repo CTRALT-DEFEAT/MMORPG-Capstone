@@ -554,6 +554,20 @@ BEGIN
             member_PK,
             cur_member
         );
+
+        INSERT INTO chat_members(
+            chat_id,
+            character_id
+        )
+        VALUES(
+            (
+                SELECT chat_id
+                FROM guilds
+                WHERE guild_id = new_guild_id
+            ),
+            cur_member
+        );
+
         SET i = i + 1;
     END WHILE;
 END $$
@@ -769,6 +783,7 @@ VALUES
 CALL random_item_info(
     500
 );
+
 CALL random_items (
     2500
 );
@@ -879,8 +894,6 @@ VALUES
     ('ugh','u**'),
     ('bleh','b***'),
     ('meh','m**');
-
--- add chat_members
 
 -- add message history
 
