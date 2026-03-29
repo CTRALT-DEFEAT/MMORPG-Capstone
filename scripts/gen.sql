@@ -355,12 +355,6 @@ BEGIN
     END WHILE;
 END $$
 
-
-
-
-
-
-
 CREATE PROCEDURE IF NOT EXISTS new_chat(
     IN chat_name VARCHAR(50),
     IN chat_private BIT,
@@ -780,8 +774,6 @@ CALL random_equiped(
 
 );
 
--- add chats
-
 INSERT INTO filters(
     word,
     filtered_word
@@ -889,15 +881,41 @@ VALUES
 
 -- add message history
 
+CALL new_chat(
+    'feywild_chat',
+    0,
+    @feywild_chat
+);
+CALL new_chat(
+    'gondor_chat',
+    0,
+    @gondor_chat
+);
+CALL new_chat(
+    'rift_chat',
+    0,
+    @rift_chat
+);
+CALL new_chat(
+    'garden_city_chat',
+    0,
+    @garden_city_chat
+);
+CALL new_chat(
+    'end_chat',
+    0,
+    @end_chat
+);
 INSERT INTO regions(
+    chat_id,
     name
 )
 VALUES
-    ('Feywild'),
-    ('Gondor'),
-    ('The Rift'),
-    ('Garden City'),
-    ('The End');
+    (@feywild_chat, 'Feywild'),
+    (@gondor_chat, 'Gondor'),
+    (@rift_chat, 'The Rift'),
+    (@garden_city_chat, 'Garden City'),
+    (@end_chat, 'The End');
 
 INSERT INTO factions(
     region_id,
