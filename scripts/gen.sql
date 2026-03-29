@@ -574,6 +574,7 @@ BEGIN
             region,
             CONCAT('Zone', i)
         );
+        SET i = i + 1;
     END WHILE;
 END $$
 
@@ -647,7 +648,9 @@ BEGIN
             SELECT dialog_id
             FROM npc_dialog
             WHERE npc_id = new_npc_id
-        );
+        )
+        ORDER BY RAND()
+        LIMIT 1;
 
         INSERT INTO npc_dialog(
             dialog_id,
