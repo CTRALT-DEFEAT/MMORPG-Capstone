@@ -1330,7 +1330,7 @@ BEGIN
     WHILE i <= chat_count DO
         SET num_of_history =
         FLOOR(min_history + RAND() * max_history);
-        
+
         WHILE z <= num_of_history DO
             SELECT character_id INTO chat_member
             FROM chat_members
@@ -1375,7 +1375,28 @@ BEGIN
     DROP TEMPORARY TABLE IF EXISTS messages;
 END $$
 
+CREATE PROCEDURE IF NOT EXISTS random_loot_tables(
+    IN num_of_tables INT
+)
+BEGIN
+    DECLARE i INT DEFAULT 1;
 
+    WHILE num_of_tables <= i DO
+        INSERT INTO loot_table(
+            min_gold,
+            max_gold,
+            min_exp,
+            max_exp
+        )
+        VALUES(
+            FLOOR(1 + RAND() * 15),
+            FLOOR(15 + RAND() * 100),
+            FLOOR(25 + RAND() * 1000),
+            FLOOR(1000 + RAND() * 10000)
+        );
+        SET i = i + 1;
+    END WHILE;
+END $$
 
 DELIMITER ;
 
@@ -2204,7 +2225,10 @@ VALUES
     (99,1,'Clear Forest','Clear forest threats',1,'FOREST14'),
     (100,1,'Final Battle','Defeat the final boss',0,'BOSS0001');
 
--- add loot_tables
+
+CALL random_loot_tables(
+    250
+);
 
 -- add loot_table_items
 
