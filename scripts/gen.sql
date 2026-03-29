@@ -1989,6 +1989,7 @@ BEGIN
         ('You’re just a little numpty who doesn’t belong here.');
 
     WHILE i <= chat_count DO
+        SET z = 1;
         SET num_of_history =
         FLOOR(min_history + RAND() * max_history);
 
@@ -2072,6 +2073,7 @@ BEGIN
     FROM loot_tables;
 
     WHILE i <= loot_table_count DO
+        SET z = 1;
         SET item_count = 
         FLOOR(min_items + RAND() * max_items);
 
@@ -2153,7 +2155,6 @@ BEGIN
     FROM characters;
 
     WHILE i <= character_count DO
-
         SET z = 1;
 
         SET history_count =
@@ -2247,6 +2248,55 @@ BEGIN
         SET i = i + 1;
     END WHILE;
 END $$
+
+CREATE PROCEDURE IF NOT EXISTS random_zone_mobs(
+    IN min_mobs INT,
+    IN max_mobs INT
+)
+BEGIN
+    DECLARE i INT DEFAULT 1;
+    DECLARE z INT DEFAULT 1;
+    DECLARE mob_count INT;
+    DECLARE zone_count INT;
+    SELECT COUNT(*) INTO zone_count
+    FROM zones;
+
+    WHILE i <= zone_count DO
+        SET z = 1;
+        SET mob_count =
+        FLOOR(min_mobs + RAND() * max_mobs);
+
+        WHILE z <= mob_count DO
+
+            INSERT INTO zone_mobs(
+                zone_id,
+                mob_id,
+                amount
+            )
+            VALUES(
+                i,
+                (
+                    SELECT mob_id
+                    FROM mobs
+                    WHERE mob_id NOT IN (
+                        SELECT mob_id
+                        FROM zone_mobs
+                        WHERE zone_id = i
+                    )
+                    ORDER BY RAND()
+                    LIMIT 1
+                ),
+                FLOOR(1 + RAND() * 25)
+            );
+
+            SET z = z + 1;
+        END WHILE;
+
+        SET i = i + 1;
+    END WHILE;
+END $$
+
+
 
 
 DELIMITER ;
@@ -3091,13 +3141,14 @@ CALL random_quest_rewards(
 
 );
 
--- add quest_history
 CALL random_quest_history(
     5,
     50
 );
 
--- add mobs
+CALL random_mobs(
+    500
+);
 
 -- add zone_mobs
 
