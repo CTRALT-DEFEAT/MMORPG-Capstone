@@ -1398,6 +1398,58 @@ BEGIN
     END WHILE;
 END $$
 
+CREATE PROCEDURE IF NOT EXISTS random_loot_table_items(
+    IN min_items INT,
+    IN max_items INT
+)
+BEGIN
+    DECLARE i INT DEFAULT 1;
+    DECLARE z INT DEFAULT 1;
+    DECLARE item_count INT;
+    DECLARE loot_table_count INT;
+    SELECT COUNT(*) INTO loot_table_count
+    FROM loot_tables;
+
+    WHILE i <= loot_table_count DO
+        SET item_count = 
+        FLOOR(min_items + RAND() * max_items);
+
+        WHILE z <= item_count DO
+
+            INSERT INTO loot_table_items(
+                item_id,
+                loot_table_id,
+                drop_rate
+            )
+            VALUES(
+                (
+                    SELECT info_id FROM item_info
+                    WHERE info_id NOT IN(
+                        SELECT item_id 
+                        FROM loot_table_items
+                        WHERE loot_table_id = i
+                    )
+                    ORDER BY RAND()
+                    LIMIT 1
+                ),
+                i,
+                (
+                    SELECT ROUND(RAND(), 10)
+                )
+            );
+            SET z = z + 1;
+        END WHILE;
+        
+        SET i = i + 1;
+    END WHILE;
+END $$
+
+
+
+
+
+
+
 DELIMITER ;
 
 INSERT INTO races (name, description)
