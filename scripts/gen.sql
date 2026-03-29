@@ -2114,6 +2114,30 @@ BEGIN
     SELECT COUNT(*) INTO quest_count
     FROM quests;
 
+    WHILE i <= quest_count DO
+
+        INSERT INTO quest_rewards(
+            item_id,
+            quest_id,
+            gold,
+            experience
+        )
+        VALUES(
+            (
+                SELECT item_id
+                FROM items
+                ORDER BY RAND()
+                LIMIT 1
+            ),
+            i,
+            FLOOR(1 + RAND() * 450),
+            FLOOR(25 + RAND() * 50000)
+        );
+        
+        SET i = i + 1;
+    END WHILE;
+END $$
+
 
 
 
@@ -2957,7 +2981,9 @@ CALL random_loot_table_items(
 );
 
 
--- add quest_rewards
+CALL random_quest_rewards(
+
+);
 
 -- add quest_history
 
