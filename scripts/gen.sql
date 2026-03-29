@@ -2153,7 +2153,7 @@ BEGIN
     FROM characters;
 
     WHILE i <= character_count DO
-    
+
         SET z = 1;
 
         SET history_count =
@@ -2218,6 +2218,35 @@ BEGIN
 
 END $$
 
+CREATE PROCEDURE IF NOT EXISTS random_mobs(
+    IN mob_count INT
+)
+BEGIN
+    DECLARE i INT DEFAULT 1;
+    DECLARE boss BIT;
+    WHILE i <= mob_count DO
+
+        SET boss = IF(RAND() > 0.94, 1, 0);
+
+        INSERT INTO mobs(
+            loot_table_id,
+            name,
+            is_boss
+        )
+        VALUES(
+            (
+                SELECT loot_table_id
+                FROM loot_tables
+                ORDER BY RAND()
+                LIMIT 1
+            ),
+            CONCAT('mob_', i),
+            boss
+        );
+
+        SET i = i + 1;
+    END WHILE;
+END $$
 
 
 DELIMITER ;
@@ -3063,6 +3092,10 @@ CALL random_quest_rewards(
 );
 
 -- add quest_history
+CALL random_quest_history(
+    5,
+    50
+);
 
 -- add mobs
 
