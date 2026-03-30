@@ -2334,6 +2334,11 @@ BEGIN
             reciever
         );
 
+        CALL gen_trade_info(
+            i,
+            NULL
+        );
+
         SET i = i + 1;
     END WHILE;
 END $$
@@ -2364,10 +2369,142 @@ BEGIN
                 LIMIT 1
             )
         );
+        
+        CALL gen_trade_info(
+            NULL,
+            i
+        );
 
         SET i = i + 1;
     END WHILE;
 END $$
+
+CREATE PROCEDURE IF NOT EXISTS gen_trade_info(
+    IN player_trade_id INT,
+    IN npc_trade_id INT
+)
+BEGIN
+    DECLARE trade_item INT;
+
+    IF player_trade_id IS NULL THEN
+        CALL random_datetime(
+            (
+                SELECT creation_date
+                FROM character_info
+                WHERE character_id IN (
+                    SELECT character_id 
+                    FROM npc_trade
+                    WHERE trade_id = npc_trade_id
+                )
+            ),
+            NOW(),
+            @trade_time
+        );
+
+        SELECT item_id INTO trade_item
+        FROM items
+        WHERE inventory_id IN (
+            SELECT inventory_id
+            FROM characters
+            WHERE character_id IN (
+                SELECT character_id
+                FROM npc_trade
+                WHERE trade_id = npc_trade_id
+            )
+        )
+        ORDER BY RAND()
+        LIMIT 1;
+
+        DELETE FROM items
+        WHERE item_id = trade_item;
+
+    ELSE
+        CALL random_datetime(
+            (
+                SELECT creation_date
+                FROM character_info
+                WHERE character_id IN (
+                    SELECT sender_id
+                    FROM player_trade
+                    WHERE trade_id = player_trade_id
+                )
+            ),
+            NOW(),
+            @trade_time
+        );
+
+        SELECT item_id INTO trade_item
+        FROM items
+        WHERE inventory_id IN (
+            SELECT inventory_id
+            FROM characters
+            WHERE character_id IN (
+                SELECT reciever_id
+                FROM player_trade
+                WHERE trade_id = player_trade_id
+            )
+        )
+        ORDER BY RAND()
+        LIMIT 1;
+
+    END IF;
+
+    INSERT INTO trade_info(
+        player_trade_id,
+        npc_trade_id,
+        item_id,
+        gold,
+        time
+    )
+    VALUES(
+        player_trade_id,
+        npc_trade_id,
+        trade_item,
+        FLOOR(0 + RAND() * 150),
+        @trade_time
+    );
+END $$
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 DELIMITER ;
@@ -3230,9 +3367,9 @@ CALL random_player_trades(
     1750
 );
 
--- add npc_trades
-
--- add trade_info
+CALL random_npc_trades(
+    1750
+);
 
 -- add combats
 
