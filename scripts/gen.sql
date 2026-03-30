@@ -2665,7 +2665,45 @@ BEGIN
     END WHILE;
 END $$
 
+CREATE PROCEDURE IF NOT EXISTS gen_race_modifiers(
+    IN min_modifiers INT,
+    IN max_modifiers INT
+)
+BEGIN
+    DECLARE i INT DEFAULT 1;
+    DECLARE z INT DEFAULT 1;
+    DECLARE modifier_amount INT;
+    DECLARE race_count INT;
+    SELECT COUNT(*) INTO race_count
+    FROM races;
 
+    WHILE i < race_count DO
+        SET z = 1;
+        SET modifier_amount =
+        FLOOR(min_modifiers + RAND() * max_modifiers);
+            WHILE z <= modifier_amount DO
+                INSERT INTO race_modifiers(
+                    modifier_id,
+                    race_id
+                )
+                VALUES(
+                    (
+                        SELECT modifier_id
+                        FROM modifiers
+                        WHERE modifier_id NOT IN(
+                            SELECT modifier_id
+                            FROM race_modifiers
+                            WHERE race_id = i
+                            
+                        )
+                    ),
+                    i
+                );
+                SET z = z + 1;
+            END WHILE;
+        SET i = i + 1;
+    END WHILE;
+END $$
 
 
 
@@ -3574,7 +3612,11 @@ CALL gen_item_modifiers(
     5
 );
 
--- add race_modifiers
+CALL gen_race_modifiers(
+    1,
+    5
+);
+
 
 -- add specialization_modifiers
 
