@@ -2471,6 +2471,7 @@ CREATE PROCEDURE IF NOT EXISTS random_combats(
 BEGIN
     DECLARE i INT DEFAULT 1;
     DECLARE z INT DEFAULT 1;
+    DECLARE new_combat_id INT DEFAULT 0;
     DECLARE character_count INT;
     SELECT COUNT(*) INTO character_count
     FROM characters;
@@ -2478,11 +2479,16 @@ BEGIN
     WHILE i < character_count DO
         SET z = 1;
         WHILE z < combat_count DO
+
+            SET new_combat_id = new_combat_id + 1;
+
             INSERT INTO combats(
+                combat_id,
                 character_id,
                 mob_id
             )
             VALUES(
+                new_combat_id,
                 i,
                 (
                     SELECT mob_id
@@ -2492,12 +2498,51 @@ BEGIN
                 )
             );
 
+            CALL random_combat_info(
+                i
+            );
+
             SET z = z + 1;
         END WHILE;
         SET i = i + 1;
     END WHILE;
 END $$
 
+CREATE PROCEDURE IF NOT EXISTS random_combat_info(
+    IN new_combat_id INT
+)
+BEGIN
+    DECLARE combat_result VARCHAR(4);
+    IF RAND() > 0.09 THEN
+        SET combat_result = 'win';
+    ELSE
+        SET combat_result = 'loss';
+    END IF;
+
+    CALL random_datetime(
+        (
+            SELECT creation_date
+            FROM character_info
+            WHERE character_id IN (
+                SELECT character_id
+                FROM combats
+                WHERE combat_id = new_combat_id
+            )
+        ),
+        NOW(),
+        @combat_time
+    );
+
+    INSERT INTO combat_info(
+        combat_id,
+        time,
+        result
+    )
+    VALUES(
+        new_combat_id,
+        @combat_time
+    );
+END $$
 
 
 
