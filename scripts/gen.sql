@@ -2465,8 +2465,38 @@ BEGIN
     );
 END $$
 
+CREATE PROCEDURE IF NOT EXISTS random_combats(
+    IN combat_count INT
+)
+BEGIN
+    DECLARE i INT DEFAULT 1;
+    DECLARE z INT DEFAULT 1;
+    DECLARE character_count INT;
+    SELECT COUNT(*) INTO character_count
+    FROM characters;
 
+    WHILE i < character_count DO
+        SET z = 1;
+        WHILE z < combat_count DO
+            INSERT INTO combats(
+                character_id,
+                mob_id
+            )
+            VALUES(
+                i,
+                (
+                    SELECT mob_id
+                    FROM mobs
+                    ORDER BY RAND()
+                    LIMIT 1
+                )
+            );
 
+            SET z = z + 1;
+        END WHILE;
+        SET i = i + 1;
+    END WHILE;
+END $$
 
 
 
@@ -3371,7 +3401,9 @@ CALL random_npc_trades(
     1750
 );
 
--- add combats
+CALL random_combats(
+    150
+);
 
 -- add combat_info
 
