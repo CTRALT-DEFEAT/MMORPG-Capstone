@@ -2705,7 +2705,85 @@ BEGIN
     END WHILE;
 END $$
 
+CREATE PROCEDURE IF NOT EXISTS gen_specialization_modifiers(
+    IN min_modifiers INT,
+    IN max_modifiers INT
+)
+BEGIN
+    DECLARE i INT DEFAULT 1;
+    DECLARE z INT DEFAULT 1;
+    DECLARE modifier_amount INT;
+    DECLARE specialization_count INT;
+    SELECT COUNT(*) INTO specialization_count
+    FROM specializations;
 
+    WHILE i < specialization_count DO
+        SET z = 1;
+        SET modifier_amount =
+        FLOOR(min_modifiers + RAND() * max_modifiers);
+            WHILE z <= modifier_amount DO
+                INSERT INTO specializations_modifiers(
+                    modifier_id,
+                    specialization_id
+                )
+                VALUES(
+                    (
+                        SELECT modifier_id
+                        FROM modifiers
+                        WHERE modifier_id NOT IN(
+                            SELECT modifier_id
+                            FROM specializations_modifiers
+                            WHERE specialization_id = i
+                            
+                        )
+                    ),
+                    i
+                );
+                SET z = z + 1;
+            END WHILE;
+        SET i = i + 1;
+    END WHILE;
+END $$
+
+CREATE PROCEDURE IF NOT EXISTS gen_class_modifiers(
+    IN min_modifiers INT,
+    IN max_modifiers INT
+)
+BEGIN
+    DECLARE i INT DEFAULT 1;
+    DECLARE z INT DEFAULT 1;
+    DECLARE modifier_amount INT;
+    DECLARE class_count INT;
+    SELECT COUNT(*) INTO class_count
+    FROM classes;
+
+    WHILE i < class_count DO
+        SET z = 1;
+        SET modifier_amount =
+        FLOOR(min_modifiers + RAND() * max_modifiers);
+            WHILE z <= modifier_amount DO
+                INSERT INTO class_modifiers(
+                    modifier_id,
+                    class_id
+                )
+                VALUES(
+                    (
+                        SELECT modifier_id
+                        FROM modifiers
+                        WHERE modifier_id NOT IN(
+                            SELECT modifier_id
+                            FROM class_modifiers
+                            WHERE class_id = i
+                            
+                        )
+                    ),
+                    i
+                );
+                SET z = z + 1;
+            END WHILE;
+        SET i = i + 1;
+    END WHILE;
+END $$
 
 
 
@@ -3617,8 +3695,15 @@ CALL gen_race_modifiers(
     5
 );
 
+CALL gen_specializaion_modifiers(
+    1,
+    5
+);
 
--- add specialization_modifiers
+CALL gen_class_modifiers(
+    1,
+    5
+);
 
 -- add class_modifiers
 
