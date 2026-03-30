@@ -2583,11 +2583,48 @@ BEGIN
     END WHILE;
 END $$
 
+CREATE PROCEDURE IF NOT EXISTS gen_modiers(
 
+)
+BEGIN
+    DECLARE i INT DEFAULT 1;
+    DECLARE z INT DEFAULT 1;
+    DECLARE x INT DEFAULT 1;
+    DECLARE mod_type VARCHAR(6);
+    DECLARE stat_count INT;
 
+    SELECT COUNT(*) INTO stat_count
+    FROM stats;
 
+    WHILE i <= stat_count DO 
+        SET z = 1;
+        WHILE z <= 25 DO
+            SET x = 1;
+            WHILE x <= 2 DO
+                IF x = 1 THEN
+                    SET mod_type = 'add';
+                ELSE
+                    SET mod_type = 'reduce';
+                END IF;
 
-
+                INSERT INTO modifiers(
+                    stat_id,
+                    amount,
+                    type
+                )
+                VALUES(
+                    i,
+                    z,
+                    mod_type
+                );
+                SET x = x + 1;
+            END WHILE;
+            SET z = z + 1;
+        END WHILE;
+        SET i = i + 1;
+    END WHILE;
+END $$
+                
 
 
 
@@ -3488,9 +3525,9 @@ CALL random_combats(
     150
 );
 
--- add combat_equipment
+CALL gen_modifiers(
 
--- add modifiers
+);
 
 -- add item_modifiers
 
