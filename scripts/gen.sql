@@ -2338,6 +2338,37 @@ BEGIN
     END WHILE;
 END $$
 
+CREATE PROCEDURE IF NOT EXISTS random_npc_trades(
+    IN trade_count INT
+)
+BEGIN
+    DECLARE i INT DEFAULT 1;
+
+    WHILE i < trade_count DO
+
+        INSERT INTO npc_trades(
+            character_id,
+            npc_id
+        )
+        VALUES(
+            (
+                SELECT character_id
+                FROM characters
+                ORDER BY RAND()
+                LIMIT 1
+            ),
+            (
+                SELECT npc_id
+                FROM npcs
+                ORDER BY RAND()
+                LIMIT 1
+            )
+        );
+
+        SET i = i + 1;
+    END WHILE;
+END $$
+
 
 DELIMITER ;
 
@@ -3195,7 +3226,9 @@ CALL random_zone_mobs(
     15
 );
 
--- add player_trades
+CALL random_player_trades(
+    1750
+);
 
 -- add npc_trades
 
