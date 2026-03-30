@@ -6,7 +6,7 @@ DROP TABLE IF EXISTS item_restrictions;
 DROP TABLE IF EXISTS quest_restrictions;
 DROP TABLE IF EXISTS restrictions;
 DROP TABLE IF EXISTS class_modifiers;
-DROP TABLE IF EXISTS specialization_modifier;
+DROP TABLE IF EXISTS specialization_modifiers;
 DROP TABLE IF EXISTS race_modifiers;
 DROP TABLE IF EXISTS item_modifiers;
 DROP TABLE IF EXISTS modifiers;
@@ -114,7 +114,7 @@ CREATE TABLE IF NOT EXISTS account_history (
 );
 
 CREATE TABLE IF NOT EXISTS characters (
-    character_id INT UNSIGNED PRIMARY KEY,
+    character_id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
     class_id INT UNSIGNED NOT NULL,
     specialization_id INT UNSIGNED NOT NULL,
     race_id INT UNSIGNED NOT NULL,
@@ -414,8 +414,8 @@ CREATE TABLE IF NOT EXISTS loot_tables (
     loot_table_id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
     min_gold TINYINT UNSIGNED,
     max_gold TINYINT UNSIGNED,
-    min_exp TINYINT UNSIGNED,
-    max_exp TINYINT UNSIGNED
+    min_exp MEDIUMINT UNSIGNED,
+    max_exp MEDIUMINT UNSIGNED
 );
 
 CREATE TABLE IF NOT EXISTS loot_table_items (
@@ -573,7 +573,7 @@ CREATE TABLE IF NOT EXISTS item_modifiers (
     REFERENCES item_info(info_id)
 );
 
-CREATE TABLE IF NOT EXISTS race_modifier(
+CREATE TABLE IF NOT EXISTS race_modifiers(
     modifier_id INT UNSIGNED,
     race_id INT UNSIGNED,
 
@@ -584,7 +584,7 @@ CREATE TABLE IF NOT EXISTS race_modifier(
     REFERENCES races(race_id)
 );
 
-CREATE TABLE IF NOT EXISTS specialization_modifiers (
+CREATE TABLE IF NOT EXISTS specialization_modifiers(
     modifier_id INT UNSIGNED,
     specialization_id INT UNSIGNED,
 
@@ -595,7 +595,7 @@ CREATE TABLE IF NOT EXISTS specialization_modifiers (
     REFERENCES specializations(specialization_id)
 );
 
-CREATE TABLE IF NOT EXISTS class_modifier (
+CREATE TABLE IF NOT EXISTS class_modifiers(
     modifier_id INT UNSIGNED,
     class_id INT UNSIGNED,
 
@@ -646,7 +646,7 @@ CREATE TABLE IF NOT EXISTS item_restrictions (
     FOREIGN KEY (restriction_id)
     REFERENCES restrictions(restriction_id),
     FOREIGN KEY (item_id)
-    REFERENCES items(item_id)
+    REFERENCES item_info(info_id)
 );
 
 CREATE TABLE IF NOT EXISTS specialization_restrictions(
@@ -660,6 +660,9 @@ CREATE TABLE IF NOT EXISTS specialization_restrictions(
     REFERENCES specializations(specialization_id)
 );
 
+DROP PROCEDURE IF EXISTS random_combat_equipment;
+DROP PROCEDURE IF EXISTS random_combat_info;
+DROP PROCEDURE IF EXISTS random_combats;
 DROP PROCEDURE IF EXISTS random_character_chats;
 DROP PROCEDURE IF EXISTS random_npcs;
 DROP PROCEDURE IF EXISTS random_member_activity;
@@ -815,6 +818,7 @@ CREATE PROCEDURE IF NOT EXISTS random_character(
 )
 BEGIN
     DECLARE i INT DEFAULT 1;
+    DECLARE char_name VARCHAR(25) DEFAULT 'Thalor';
     DECLARE level INT;
     DECLARE level_count INT;
     SELECT COUNT(*) INTO level_count FROM levels;
@@ -826,12 +830,19 @@ BEGIN
         VALUES (
             i, 10 * level
         );
-
-        INSERT INTO characters (character_id, name, class_id, race_id,
-        specialization_id, level_id, inventory_id, gold_balance)
+        INSERT INTO characters (
+            character_id, 
+            name, 
+            class_id, 
+            race_id,
+            specialization_id, 
+            level_id, 
+            inventory_id, 
+            gold_balance
+        )
         VALUES (
             i,
-            CONCAT('Char_', i),
+            char_name,
             FLOOR(1+ RAND()*7),
             FLOOR(1+ RAND()*9),
             1,
@@ -841,8 +852,8 @@ BEGIN
         );
         CALL random_character_info(i);
         CALL random_character_stats(i);
-
         SET i = i + 1;
+        SET char_name = CONCAT('Char_', i);
     END WHILE;
 END $$
 
@@ -2051,7 +2062,7 @@ CREATE PROCEDURE IF NOT EXISTS random_loot_tables(
 BEGIN
     DECLARE i INT DEFAULT 1;
 
-    WHILE num_of_tables <= i DO
+    WHILE i <= num_of_tables DO
 
         INSERT INTO loot_tables(
             min_gold,
@@ -2393,7 +2404,7 @@ BEGIN
                 FROM character_info
                 WHERE character_id IN (
                     SELECT character_id 
-                    FROM npc_trade
+                    FROM npc_trades
                     WHERE trade_id = npc_trade_id
                 )
             ),
@@ -2408,14 +2419,15 @@ BEGIN
             FROM characters
             WHERE character_id IN (
                 SELECT character_id
-                FROM npc_trade
+                FROM npc_trades
                 WHERE trade_id = npc_trade_id
             )
         )
         ORDER BY RAND()
         LIMIT 1;
 
-        DELETE FROM items
+        UPDATE items
+        SET inventory_id = NULL
         WHERE item_id = trade_item;
 
     ELSE
@@ -2425,7 +2437,7 @@ BEGIN
                 FROM character_info
                 WHERE character_id IN (
                     SELECT sender_id
-                    FROM player_trade
+                    FROM player_trades
                     WHERE trade_id = player_trade_id
                 )
             ),
@@ -2440,7 +2452,7 @@ BEGIN
             FROM characters
             WHERE character_id IN (
                 SELECT reciever_id
-                FROM player_trade
+                FROM player_trades
                 WHERE trade_id = player_trade_id
             )
         )
@@ -2476,9 +2488,9 @@ BEGIN
     SELECT COUNT(*) INTO character_count
     FROM characters;
 
-    WHILE i < character_count DO
+    WHILE i <= character_count DO
         SET z = 1;
-        WHILE z < combat_count DO
+        WHILE z <= combat_count DO
 
             SET new_combat_id = new_combat_id + 1;
 
@@ -2499,12 +2511,12 @@ BEGIN
             );
 
             CALL random_combat_info(
-                new_comabt_id
+                new_combat_id
             );
             CALL random_combat_equipment(
                 new_combat_id,
                 i
-            )
+            );
 
             SET z = z + 1;
         END WHILE;
@@ -2544,7 +2556,8 @@ BEGIN
     )
     VALUES(
         new_combat_id,
-        @combat_time
+        @combat_time,
+        combat_result
     );
 END $$
 
@@ -2560,7 +2573,7 @@ BEGIN
     FROM equipped_items
     WHERE character_id = char_id;
 
-    WHILE i < equip_count DO
+    WHILE i <= equip_count DO
 
         INSERT INTO combat_equipment(
             equipped_id,
@@ -2583,7 +2596,7 @@ BEGIN
     END WHILE;
 END $$
 
-CREATE PROCEDURE IF NOT EXISTS gen_modiers(
+CREATE PROCEDURE IF NOT EXISTS gen_modifiers(
 
 )
 BEGIN
@@ -2641,26 +2654,28 @@ BEGIN
         SET z = 1;
         SET modifier_amount =
         FLOOR(min_modifiers + RAND() * max_modifiers);
-            WHILE z <= modifier_amount DO
-                INSERT INTO item_modifiers(
-                    modifier_id,
-                    item_id
-                )
-                VALUES(
-                    (
+        WHILE z <= modifier_amount DO
+            INSERT INTO item_modifiers(
+                modifier_id,
+                item_id
+            )
+            VALUES(
+                (
+                    SELECT modifier_id
+                    FROM modifiers
+                    WHERE modifier_id NOT IN(
                         SELECT modifier_id
-                        FROM modifiers
-                        WHERE modifier_id NOT IN(
-                            SELECT modifier_id
-                            FROM item_modifiers
-                            WHERE item_id = i
-                            
-                        )
-                    ),
-                    i
-                );
-                SET z = z + 1;
-            END WHILE;
+                        FROM item_modifiers
+                        WHERE item_id = i
+                        
+                    )
+                    ORDER BY RAND()
+                    LIMIT 1
+                ),
+                i
+            );
+            SET z = z + 1;
+        END WHILE;
         SET i = i + 1;
     END WHILE;
 END $$
@@ -2681,31 +2696,33 @@ BEGIN
         SET z = 1;
         SET modifier_amount =
         FLOOR(min_modifiers + RAND() * max_modifiers);
-            WHILE z <= modifier_amount DO
-                INSERT INTO race_modifiers(
-                    modifier_id,
-                    race_id
-                )
-                VALUES(
-                    (
+        WHILE z <= modifier_amount DO
+            INSERT INTO race_modifiers(
+                modifier_id,
+                race_id
+            )
+            VALUES(
+                (
+                    SELECT modifier_id
+                    FROM modifiers
+                    WHERE modifier_id NOT IN(
                         SELECT modifier_id
-                        FROM modifiers
-                        WHERE modifier_id NOT IN(
-                            SELECT modifier_id
-                            FROM race_modifiers
-                            WHERE race_id = i
-                            
-                        )
-                    ),
-                    i
-                );
-                SET z = z + 1;
-            END WHILE;
+                        FROM race_modifiers
+                        WHERE race_id = i
+                        
+                    )
+                    ORDER BY RAND()
+                    LIMIT 1
+                ),
+                i
+            );
+            SET z = z + 1;
+        END WHILE;
         SET i = i + 1;
     END WHILE;
 END $$
 
-CREATE PROCEDURE IF NOT EXISTS gen_specialization_modifiers(
+CREATE PROCEDURE IF NOT EXISTS gen_specializaion_modifiers(
     IN min_modifiers INT,
     IN max_modifiers INT
 )
@@ -2722,7 +2739,7 @@ BEGIN
         SET modifier_amount =
         FLOOR(min_modifiers + RAND() * max_modifiers);
             WHILE z <= modifier_amount DO
-                INSERT INTO specializations_modifiers(
+                INSERT INTO specialization_modifiers(
                     modifier_id,
                     specialization_id
                 )
@@ -2732,10 +2749,12 @@ BEGIN
                         FROM modifiers
                         WHERE modifier_id NOT IN(
                             SELECT modifier_id
-                            FROM specializations_modifiers
+                            FROM specialization_modifiers
                             WHERE specialization_id = i
                             
                         )
+                        ORDER BY RAND()
+                        LIMIT 1
                     ),
                     i
                 );
@@ -2776,6 +2795,8 @@ BEGIN
                             WHERE class_id = i
                             
                         )
+                        ORDER BY RAND()
+                        LIMIT 1
                     ),
                     i
                 );
@@ -2817,7 +2838,7 @@ BEGIN
         END IF;
 
         WHILE i <= class_count DO
-            INSERT INTO restriction(
+            INSERT INTO restrictions(
                 class_id,
                 type
             )
@@ -2830,7 +2851,7 @@ BEGIN
         SET i = 1;
 
         WHILE i <= specialization_count DO
-            INSERT INTO restriction(
+            INSERT INTO restrictions(
                 specialization_id,
                 type
             )
@@ -2843,7 +2864,7 @@ BEGIN
         SET i = 1;
 
         WHILE i <= race_count DO
-            INSERT INTO restriction(
+            INSERT INTO restrictions(
                 race_id,
                 type
             )
@@ -2856,7 +2877,7 @@ BEGIN
         SET i = 1;
 
         WHILE i <= level_count DO
-            INSERT INTO restriction(
+            INSERT INTO restrictions(
                 level_id,
                 type
             )
@@ -2869,7 +2890,7 @@ BEGIN
         SET i = 1;
 
         WHILE i <= quest_count DO
-            INSERT INTO restriction(
+            INSERT INTO restrictions(
                 quest_id,
                 type
             )
@@ -2884,30 +2905,128 @@ BEGIN
     END WHILE;
 END $$
 
+CREATE PROCEDURE IF NOT EXISTS gen_quest_restrictions(
+    IN min_restrictions INT,
+    IN max_restrictions INT
+)
+BEGIN
+    DECLARE i INT DEFAULT 1;
+    DECLARE z INT DEFAULT 1;
+    DECLARE restriction_amount INT;
+    DECLARE quest_count INT;
+    SELECT COUNT(*) INTO quest_count
+    FROM quests;
 
+    WHILE i < quest_count DO
+        SET z = 1;
+        SET restriction_amount =
+        FLOOR(min_restrictions + RAND() * max_restrictions);
+        WHILE z <= restriction_amount DO
+            INSERT INTO quest_restrictions(
+                restriction_id,
+                quest_id
+            )
+            VALUES(
+                (
+                    SELECT restriction_id
+                    FROM restrictions
+                    WHERE restriction_id NOT IN(
+                        SELECT restriction_id
+                        FROM quest_restrictions
+                        WHERE quest_id = i
+                    )
+                    ORDER BY RAND()
+                    LIMIT 1
+                ),
+                i
+            );
+            SET z = z + 1;
+        END WHILE;
+        SET i = i + 1;
+    END WHILE;
+END $$
 
+CREATE PROCEDURE IF NOT EXISTS gen_item_restrictions(
+    IN min_restrictions INT,
+    IN max_restrictions INT
+)
+BEGIN
+    DECLARE i INT DEFAULT 1;
+    DECLARE z INT DEFAULT 1;
+    DECLARE restriction_amount INT;
+    DECLARE item_count INT;
+    SELECT COUNT(*) INTO item_count
+    FROM item_info;
 
+    WHILE i < item_count DO
+        SET z = 1;
+        SET restriction_amount =
+        FLOOR(min_restrictions + RAND() * max_restrictions);
+        WHILE z <= restriction_amount DO
+            INSERT INTO item_restrictions(
+                restriction_id,
+                item_id
+            )
+            VALUES(
+                (
+                    SELECT restriction_id
+                    FROM restrictions
+                    WHERE restriction_id NOT IN(
+                        SELECT restriction_id
+                        FROM item_restrictions
+                        WHERE item_id = i
+                    )
+                    ORDER BY RAND()
+                    LIMIT 1
+                ),
+                i
+            );
+            SET z = z + 1;
+        END WHILE;
+        SET i = i + 1;
+    END WHILE;
+END $$
 
+CREATE PROCEDURE IF NOT EXISTS gen_specialization_restrictions(
+    IN min_restrictions INT,
+    IN max_restrictions INT
+)
+BEGIN
+    DECLARE i INT DEFAULT 1;
+    DECLARE z INT DEFAULT 1;
+    DECLARE restriction_amount INT;
+    DECLARE specialization_count INT;
+    SELECT COUNT(*) INTO specialization_count
+    FROM specializations;
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+    WHILE i < specialization_count DO
+        SET z = 1;
+        SET restriction_amount =
+        FLOOR(min_restrictions + RAND() * max_restrictions);
+        WHILE z <= restriction_amount DO
+            INSERT INTO specialization_restrictions(
+                restriction_id,
+                specialization_id
+            )
+            VALUES(
+                (
+                    SELECT restriction_id
+                    FROM restrictions
+                    WHERE restriction_id NOT IN(
+                        SELECT restriction_id
+                        FROM specialization_restrictions
+                        WHERE specialization_id = i
+                    )
+                    ORDER BY RAND()
+                    LIMIT 1
+                ),
+                i
+            );
+            SET z = z + 1;
+        END WHILE;
+        SET i = i + 1;
+    END WHILE;
+END $$
 
 DELIMITER ;
 
@@ -2990,7 +3109,7 @@ VALUES
         ('Trinket');
 
 CALL random_account(
-    1000,
+    750,
     NOW(),
     '2005-06-07 15:54:02',
     5,
@@ -2998,8 +3117,9 @@ CALL random_account(
 );
 
 CALL random_character(
-    3000
+    2000
 );
+
 
 INSERT INTO item_rarities(name, color)
 VALUES
@@ -3011,6 +3131,23 @@ VALUES
 
 CALL random_item_info(
     500
+);
+
+INSERT INTO item_info(
+    rarity_id,
+    name,
+    durability_max,
+    sell_price,
+    repair_cost,
+    two_handed
+)
+VALUES(
+    4,
+    'Axe of the First Moon',
+    200,
+    150,
+    25,
+    1
 );
 
 CALL random_items (
@@ -3197,7 +3334,7 @@ VALUES
     ('leader', 1, 1, 1, 1);
 
 CALL random_guilds(
-    100,
+    50,
     '2005-05-03 05:03:35',
     NOW()
 );
@@ -3734,7 +3871,8 @@ VALUES
     (97,1,'Ancient Shrine','Visit ancient shrine',0,'SHRINE01'),
     (98,1,'Deliver Food','Deliver food supplies',1,'VILLAGE8'),
     (99,1,'Clear Forest','Clear forest threats',1,'FOREST14'),
-    (100,1,'Final Battle','Defeat the final boss',0,'BOSS0001');
+    (100,1,'Final Battle','Defeat the final boss',0,'BOSS0001'),
+    (101,1,'Wrath of the Dwarven Lords','Defeat the Dwarven Lords',0,'BOSS0005');
 
 
 CALL random_loot_tables(
@@ -3774,7 +3912,7 @@ CALL random_npc_trades(
 );
 
 CALL random_combats(
-    150
+    5
 );
 
 CALL gen_modifiers(
@@ -3801,12 +3939,21 @@ CALL gen_class_modifiers(
     5
 );
 
-call gen_restrictions(
+CAll gen_restrictions(
 
 );
 
--- add quest_restrictions
+CALL gen_quest_restrictions(
+    1,
+    5
+);
 
--- add item_restrictions
+CALL gen_item_restrictions(
+    1,
+    5
+);
 
--- add specialization_restrictions
+CALL gen_specialization_restrictions(
+    1,
+    5
+);
