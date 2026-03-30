@@ -570,7 +570,7 @@ CREATE TABLE IF NOT EXISTS item_modifiers (
     FOREIGN KEY (modifier_id)
     REFERENCES modifiers(modifier_id),
     FOREIGN KEY (item_id)
-    REFERENCES items(item_id)
+    REFERENCES item_info(info_id)
 );
 
 CREATE TABLE IF NOT EXISTS race_modifier(
@@ -2625,6 +2625,46 @@ BEGIN
     END WHILE;
 END $$
                 
+CREATE PROCEDURE IF NOT EXISTS gen_item_modifiers(
+    IN min_modifiers INT,
+    IN max_modifiers INT
+)
+BEGIN
+    DECLARE i INT DEFAULT 1;
+    DECLARE z INT DEFAULT 1;
+    DECLARE modifier_amount INT;
+    DECLARE item_info_count INT;
+    SELECT COUNT(*) INTO item_info_count
+    FROM item_info;
+
+    WHILE i < item_info_count DO
+        SET z = 1;
+        SET modifier_amount =
+        FLOOR(min_modifiers + RAND() * max_modifiers);
+            WHILE z <= modifier_amount DO
+                INSERT INTO item_modifiers(
+                    modifier_id,
+                    item_id
+                )
+                VALUES(
+                    (
+                        SELECT modifier_id
+                        FROM modifiers
+                        WHERE modifier_id NOT IN(
+                            SELECT modifier_id
+                            FROM item_modifiers
+                            WHERE item_id = i
+                            
+                        )
+                    ),
+                    i
+                );
+                SET z = z + 1;
+            END WHILE;
+        SET i = i + 1;
+    END WHILE;
+END $$
+
 
 
 
@@ -3529,7 +3569,10 @@ CALL gen_modifiers(
 
 );
 
--- add item_modifiers
+CALL gen_item_modifiers(
+    1,
+    5
+);
 
 -- add race_modifiers
 
