@@ -2499,8 +2499,12 @@ BEGIN
             );
 
             CALL random_combat_info(
-                i
+                new_comabt_id
             );
+            CALL random_combat_equipment(
+                new_combat_id,
+                i
+            )
 
             SET z = z + 1;
         END WHILE;
@@ -2544,6 +2548,40 @@ BEGIN
     );
 END $$
 
+CREATE PROCEDURE IF NOT EXISTS random_combat_equipment (
+    IN new_combat_id INT,
+    IN char_id INT
+)
+BEGIN
+    DECLARE i INT DEFAULT 1;
+    DECLARE item_offset INT DEFAULT 0;
+    DECLARE equip_count INT;
+    SELECT COUNT(*) INTO equip_count
+    FROM equipped_items
+    WHERE character_id = char_id;
+
+    WHILE i < equip_count DO
+
+        INSERT INTO combat_equipment(
+            equipped_id,
+            combat_id,
+            durability_lost
+        )
+        VALUES(
+            (
+                SELECT equipped_id
+                FROM equipped_items
+                WHERE character_id = char_id
+                ORDER BY equipped_id DESC
+                LIMIT 1 OFFSET item_offset
+            ),
+            new_combat_id,
+            FLOOR(1 + RAND() * 55)
+        );
+        SET item_offset = item_offset + 1;
+        SET i = i + 1;
+    END WHILE;
+END $$
 
 
 
@@ -3449,8 +3487,6 @@ CALL random_npc_trades(
 CALL random_combats(
     150
 );
-
--- add combat_info
 
 -- add combat_equipment
 
