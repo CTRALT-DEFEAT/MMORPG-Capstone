@@ -2305,6 +2305,39 @@ BEGIN
     END WHILE;
 END $$
 
+CREATE PROCEDURE IF NOT EXISTS random_player_trades(
+    IN number_of_trades INT
+)
+BEGIN
+    DECLARE i INT DEFAULT 1;
+    DECLARE sender INT;
+    DECLARE reciever INT;
+
+    WHILE i < number_of_trades DO
+        SELECT character_id INTO sender
+        FROM characters
+        ORDER BY RAND()
+        LIMIT 1;
+
+        SELECT character_id INTO reciever
+        FROM characters
+        WHERE character_id != sender
+        ORDER BY RAND()
+        LIMIT  1;
+
+        INSERT INTO player_trades(
+            sender_id,
+            reciever_id
+        )
+        VALUES(
+            sender,
+            reciever
+        );
+
+        SET i = i + 1;
+    END WHILE;
+END $$
+
 
 DELIMITER ;
 
