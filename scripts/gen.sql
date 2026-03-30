@@ -2785,8 +2785,104 @@ BEGIN
     END WHILE;
 END $$
 
+CREATE PROCEDURE IF NOT EXISTS gen_restrictions(
 
+)
+BEGIN
+    DECLARE i INT DEFAULT 1;
+    DECLARE z INT DEFAULT 1;
+    DECLARE class_count INT;
+    DECLARE specialization_count INT;
+    DECLARE race_count INT;
+    DECLARE level_count INT;
+    DECLARE quest_count INT;
+    DECLARE res_type CHAR(11);
+    
+    SELECT COUNT(*) INTO class_count
+    FROM classes;
+    SELECT COUNT(*) INTO specialization_count
+    FROM specializations;
+    SELECT COUNT(*) INTO race_count
+    FROM races;
+    SELECT COUNT(*) INTO level_count
+    FROM levels;
+    SELECT COUNT(*) INTO quest_count
+    FROM quests;
+    WHILE z <= 2 DO
 
+        IF z = 1 THEN
+            SET res_type = 'requirement';
+        ELSE
+            SET res_type = 'restriction';
+        END IF;
+
+        WHILE i <= class_count DO
+            INSERT INTO restriction(
+                class_id,
+                type
+            )
+            VALUES(
+                i,
+                res_type
+            );
+            SET i = i + 1;
+        END WHILE;
+        SET i = 1;
+
+        WHILE i <= specialization_count DO
+            INSERT INTO restriction(
+                specialization_id,
+                type
+            )
+            VALUES(
+                i,
+                res_type
+            );
+            SET i = i + 1;
+        END WHILE;
+        SET i = 1;
+
+        WHILE i <= race_count DO
+            INSERT INTO restriction(
+                race_id,
+                type
+            )
+            VALUES(
+                i,
+                res_type
+            );
+            SET i = i + 1;
+        END WHILE;
+        SET i = 1;
+
+        WHILE i <= level_count DO
+            INSERT INTO restriction(
+                level_id,
+                type
+            )
+            VALUES(
+                i,
+                res_type
+            );
+            SET i = i + 1;
+        END WHILE;
+        SET i = 1;
+
+        WHILE i <= quest_count DO
+            INSERT INTO restriction(
+                quest_id,
+                type
+            )
+            VALUES(
+                i,
+                res_type
+            );
+            SET i = i + 1;
+        END WHILE;
+        SET i = 1;
+    SET z = z + 1;
+    END WHILE;
+END $$
 
 
 
@@ -3705,9 +3801,9 @@ CALL gen_class_modifiers(
     5
 );
 
--- add class_modifiers
+call gen_restrictions(
 
--- add restrictions
+);
 
 -- add quest_restrictions
 
