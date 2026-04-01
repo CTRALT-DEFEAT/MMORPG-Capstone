@@ -3008,6 +3008,13 @@ BEGIN
     -- ('Exorcist') -> Paladin, Priest, 
     -- ('Feral') ->Druid, Warrior, Hunter 
     -- ('Holy') -> Paladin, Priest
+    CREATE OR REPLACE VIEW special_res AS
+    SELECT c.name AS 'class_name',
+           r.restriction_id AS 'restrcition_id',
+           r.type AS 'type'
+    FROM classes c
+    INNER JOIN restrictions r ON c.class_id = r.class_id
+    AND r.type = 'required';
 
     INSERT INTO specialization_restrictions(
         specialization_id,
@@ -3016,8 +3023,35 @@ BEGIN
     VALUES
         (
             1,
-             
+            SELECT restriction_id
+            FROM special_res
+            WHERE class_name = 'Hunter'
+        ),
+        (
+            2,
+            SELECT restriction_id
+            FROM special_res
+            WHERE class_name = 'Warrior'
+        ),
+        (
+            2,
+            SELECT restriction_id
+            FROM special_res
+            WHERE class_name = 'Rogue'
+        ),
+        (
+            3,
+            SELECT restriction_id
+            FROM special_res
+            WHERE class_name = 'Mage'
         )
+        (
+            3,
+            SELECT restriction_id
+            FROM special_res
+            WHERE class_name = 'Hunter'
+        ),
+        
 END $$
 
 DELIMITER ;
