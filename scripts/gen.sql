@@ -2988,44 +2988,36 @@ BEGIN
 END $$
 
 CREATE PROCEDURE IF NOT EXISTS gen_specialization_restrictions(
-    IN min_restrictions INT,
-    IN max_restrictions INT
 )
 BEGIN
-    DECLARE i INT DEFAULT 1;
-    DECLARE z INT DEFAULT 1;
-    DECLARE restriction_amount INT;
-    DECLARE specialization_count INT;
-    SELECT COUNT(*) INTO specialization_count
-    FROM specializations;
+    # Join restrictions with
+    # classes Where c.class_id = r.class_id
+    # then insert according
+    -- ('Ranger'), -> Hunter
+    -- ('Berserker') -> Warrior, Rogue
+    -- ('Arcanist') - > Mage, Hunter, Druid
+    -- ('Thaumaturge') -> Mage, Druid
+    -- ('Oracle') -> Priest, Paladin, Mage
+    -- ('Spelltheif') -> Rogue, Mage, Druid
+    -- ('Brawler') Warrior, Hunter, Paladin
+    -- ('Noble') -> Priest, Paladin, Warrior
+    -- ('Monk') -> Rogue, Hunter,
+    -- ('Assassin')-> Rogue, Druid, Hunter
+    -- ('Tamer')-> Druid, Hunter
+    -- ('Collector') -> Rogue, Mage, Priest
+    -- ('Exorcist') -> Paladin, Priest, 
+    -- ('Feral') ->Druid, Warrior, Hunter 
+    -- ('Holy') -> Paladin, Priest
 
-    WHILE i < specialization_count DO
-        SET z = 1;
-        SET restriction_amount =
-        FLOOR(min_restrictions + RAND() * max_restrictions);
-        WHILE z <= restriction_amount DO
-            INSERT INTO specialization_restrictions(
-                restriction_id,
-                specialization_id
-            )
-            VALUES(
-                (
-                    SELECT restriction_id
-                    FROM restrictions
-                    WHERE restriction_id NOT IN(
-                        SELECT restriction_id
-                        FROM specialization_restrictions
-                        WHERE specialization_id = i
-                    )
-                    ORDER BY RAND()
-                    LIMIT 1
-                ),
-                i
-            );
-            SET z = z + 1;
-        END WHILE;
-        SET i = i + 1;
-    END WHILE;
+    INSERT INTO specialization_restrictions(
+        specialization_id,
+        restriction_id
+    )
+    VALUES
+        (
+            1,
+             
+        )
 END $$
 
 DELIMITER ;
