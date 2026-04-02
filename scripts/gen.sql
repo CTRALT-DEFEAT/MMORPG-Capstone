@@ -660,6 +660,8 @@ CREATE TABLE IF NOT EXISTS specialization_restrictions(
     REFERENCES specializations(specialization_id)
 );
 
+DROP PROCEDURE IF EXISTS random_specializations;
+DROP PROCEDURE IF EXISTS gen_specialization_restrictions;
 DROP PROCEDURE IF EXISTS random_combat_equipment;
 DROP PROCEDURE IF EXISTS random_combat_info;
 DROP PROCEDURE IF EXISTS random_combats;
@@ -2988,318 +2990,69 @@ BEGIN
 END $$
 
 CREATE PROCEDURE IF NOT EXISTS gen_specialization_restrictions(
+
 )
 BEGIN
-    CREATE OR REPLACE VIEW special_res AS
-    SELECT c.name AS 'class_name',
-           r.restriction_id AS 'restrcition_id',
-           r.type AS 'type'
-    FROM classes c
-    INNER JOIN restrictions r ON c.class_id = r.class_id
-    AND r.type = 'required';
-
-    INSERT INTO specialization_restrictions(
-        specialization_id,
-        restriction_id
+    INSERT INTO specialization_restrictions (specialization_id, restriction_id)
+    WITH target_mappings AS (
+        SELECT 1 AS spec_id, 'Hunter' AS c_name UNION ALL
+        SELECT 2, 'Warrior' UNION ALL SELECT 2, 'Rogue' UNION ALL
+        SELECT 3, 'Mage'    UNION ALL SELECT 3, 'Hunter'  UNION ALL SELECT 3, 'Druid' UNION ALL
+        SELECT 4, 'Mage'    UNION ALL SELECT 4, 'Druid'   UNION ALL
+        SELECT 5, 'Priest'  UNION ALL SELECT 5, 'Paladin' UNION ALL SELECT 5, 'Mage'  UNION ALL
+        SELECT 6, 'Rogue'   UNION ALL SELECT 6, 'Mage'    UNION ALL SELECT 6, 'Druid' UNION ALL
+        SELECT 7, 'Warrior' UNION ALL SELECT 7, 'Hunter'  UNION ALL SELECT 7, 'Paladin' UNION ALL
+        SELECT 8, 'Priest'  UNION ALL SELECT 8, 'Paladin' UNION ALL SELECT 8, 'Warrior' UNION ALL
+        SELECT 9, 'Rogue'   UNION ALL SELECT 9, 'Hunter'  UNION ALL
+        SELECT 10, 'Rogue'  UNION ALL SELECT 10, 'Druid'  UNION ALL SELECT 10, 'Hunter' UNION ALL
+        SELECT 11, 'Druid'  UNION ALL SELECT 11, 'Hunter' UNION ALL
+        SELECT 12, 'Rogue'  UNION ALL SELECT 12, 'Mage'   UNION ALL SELECT 12, 'Priest' UNION ALL
+        SELECT 13, 'Paladin' UNION ALL SELECT 13, 'Priest' UNION ALL
+        SELECT 14, 'Druid'  UNION ALL SELECT 14, 'Warrior' UNION ALL SELECT 14, 'Hunter' UNION ALL
+        SELECT 15, 'Paladin' UNION ALL SELECT 15, 'Priest'
     )
-    VALUES
-        (
-            1,
-            (
-                SELECT restriction_id
-                FROM special_res
-                WHERE class_name = 'Hunter'
-            )
-        ),
-        (
-            2,
-            (
-                SELECT restriction_id
-                FROM special_res
-                WHERE class_name = 'Warrior'
-            )
-        ),
-        (
-            2,
-            (
-                SELECT restriction_id
-                FROM special_res
-                WHERE class_name = 'Rogue'
-            )
-        ),
-        (
-            3,
-            (
-                SELECT restriction_id
-                FROM special_res
-                WHERE class_name = 'Mage'
-            )
-        ),
-        (
-            3,
-            (
-                SELECT restriction_id
-                FROM special_res
-                WHERE class_name = 'Hunter'
-            )
-        ),
-        (
-            3,
-            (
-                SELECT restriction_id
-                FROM special_res
-                WHERE class_name = 'Druid'
-            )
-        ),
-        (
-            4,
-            (
-                SELECT restriction_id
-                FROM special_res
-                WHERE class_name = 'Mage'
-            )
-        ),
-        (
-            4,
-            (
-                SELECT restriction_id
-                FROM special_res
-                WHERE class_name = 'Druid'
-            )
-        ),
-        (
-            5,
-            (
-                SELECT restriction_id
-                FROM special_res
-                WHERE class_name = 'Priest'
-            )
-        ),
-        (
-            5,
-            (
-                SELECT restriction_id
-                FROM special_res
-                WHERE class_name = 'Paladin'
-            )
-        ),
-        (
-            5,
-            (
-                SELECT restriction_id
-                FROM special_res
-                WHERE class_name = 'Mage'
-            )
-        ),
-        (
-            6,
-            (
-                SELECT restriction_id
-                FROM special_res
-                WHERE class_name = 'Rogue'
-            )
-        ),
-        (
-            6,
-            (
-                SELECT restriction_id
-                FROM special_res
-                WHERE class_name = 'Mage'
-            )
-        ),
-        (
-            6,
-            (
-                SELECT restriction_id
-                FROM special_res
-                WHERE class_name = 'Druid'
-            )
-        ),
-        (
-            7,
-            (
-                SELECT restriction_id
-                FROM special_res
-                WHERE class_name = 'Warrior'
-            )
-        ),
-        (
-            7,
-            (
-                SELECT restriction_id
-                FROM special_res
-                WHERE class_name = 'Hunter'
-            )
-        ),
-        (
-            7,
-            (
-                SELECT restriction_id
-                FROM special_res
-                WHERE class_name = 'Paladin'
-            )
-        ),
-        (
-            8,
-            (
-                SELECT restriction_id
-                FROM special_res
-                WHERE class_name = 'Priest'
-            )
-        ),
-        (
-            8,
-            (
-                SELECT restriction_id
-                FROM special_res
-                WHERE class_name = 'Paladin'
-            )
-        ),
-        (
-            8,
-            (
-                SELECT restriction_id
-                FROM special_res
-                WHERE class_name = 'Warrior'
-            )
-        ),
-        (
-            9,
-            (
-                SELECT restriction_id
-                FROM special_res
-                WHERE class_name = 'Rogue'
-            )
-        ),
-        (
-            9,
-            (
-                SELECT restriction_id
-                FROM special_res
-                WHERE class_name = 'Hunter'
-            )
-        ),
-        (
-            10,
-            (
-                SELECT restriction_id
-                FROM special_res
-                WHERE class_name = 'Rogue'
-            )
-        ),
-        (
-            10,
-            (
-                SELECT restriction_id
-                FROM special_res
-                WHERE class_name = 'Druid'
-            )
-        ),
-        (
-            10,
-            (
-                SELECT restriction_id
-                FROM special_res
-                WHERE class_name = 'Hunter'
-            )
-        ),
-        (
-            11,
-            (
-                SELECT restriction_id
-                FROM special_res
-                WHERE class_name = 'Druid'
-            )
-        ),
-        (
-            11,
-            (
-                SELECT restriction_id
-                FROM special_res
-                WHERE class_name = 'Hunter'
-            )
-        ),
-        (
-            12,
-            (
-                SELECT restriction_id
-                FROM special_res
-                WHERE class_name = 'Rogue'
-            )
-        ),
-        (
-            12,
-            (
-                SELECT restriction_id
-                FROM special_res
-                WHERE class_name = 'Mage'
-            )
-        ),
-        (
-            12,
-            (
-                SELECT restriction_id
-                FROM special_res
-                WHERE class_name = 'Priest'
-            )
-        ),
-        (
-            13,
-            (
-                SELECT restriction_id
-                FROM special_res
-                WHERE class_name = 'Paladin'
-            )
-        ),
-        (
-            13,
-            (
-                SELECT restriction_id
-                FROM special_res
-                WHERE class_name = 'Priest'
-            )
-        ),
-        (
-            14,
-            (
-                SELECT restriction_id
-                FROM special_res
-                WHERE class_name = 'Druid'
-            )
-        ),
-        (
-            14,
-            (
-                SELECT restriction_id
-                FROM special_res
-                WHERE class_name = 'Warrior'
-            )
-        ),
-        (
-            14,
-            (
-                SELECT restriction_id
-                FROM special_res
-                WHERE class_name = 'Hunter'
-            )
-        ),
-        (
-            15,
-            (
-                SELECT restriction_id
-                FROM special_res
-                WHERE class_name = 'Paladin'
-            )
-        ),
-        (
-            15,
-            (
-                SELECT restriction_id
-                FROM special_res
-                WHERE class_name = 'Priest'
-            )
-        );
+    SELECT tm.spec_id, r.restriction_id
+    FROM target_mappings tm
+    INNER JOIN classes c ON tm.c_name = c.name
+    INNER JOIN restrictions r ON c.class_id = r.class_id
+    WHERE r.type = 'requirement'
+    AND NOT EXISTS (
+        SELECT 1 FROM specialization_restrictions sr 
+        WHERE sr.specialization_id = tm.spec_id 
+        AND sr.restriction_id = r.restriction_id
+    );
+END $$
 
+CREATE PROCEDURE IF NOT EXISTS random_specializations(
+
+)
+BEGIN
+    DECLARE i INT DEFAULT 1;
+    DECLARE character_count INT;
+    SELECT COUNT(*) INTO character_count
+    FROM characters;
+
+    WHILE i <= character_count DO
+
+        UPDATE characters
+        SET specialization_id = (
+            SELECT specialization_id
+            FROM specialization_restrictions
+            WHERE restriction_id IN (
+                SELECT restriction_id
+                FROM restrictions
+                WHERE class_id = (
+                    SELECT class_id
+                    FROM characters
+                    WHERE character_id = i
+                )
+            )
+            ORDER BY RAND()
+            LIMIT 1
+        )
+        WHERE character_id = i;
+        SET i = i + 1;
+    END WHILE;
 END $$
 DELIMITER ;
 
@@ -4227,6 +3980,9 @@ CALL gen_item_restrictions(
 );
 
 CALL gen_specialization_restrictions(
-    1,
-    5
+
+);
+
+CALL random_specializations(
+
 );
