@@ -2990,24 +2990,6 @@ END $$
 CREATE PROCEDURE IF NOT EXISTS gen_specialization_restrictions(
 )
 BEGIN
-    # Join restrictions with
-    # classes Where c.class_id = r.class_id
-    # then insert according
-    -- ('Ranger'), -> Hunter
-    -- ('Berserker') -> Warrior, Rogue
-    -- ('Arcanist') - > Mage, Hunter, Druid
-    -- ('Thaumaturge') -> Mage, Druid
-    -- ('Oracle') -> Priest, Paladin, Mage
-    -- ('Spelltheif') -> Rogue, Mage, Druid
-    -- ('Brawler') Warrior, Hunter, Paladin
-    -- ('Noble') -> Priest, Paladin, Warrior
-    -- ('Monk') -> Rogue, Hunter,
-    -- ('Assassin')-> Rogue, Druid, Hunter
-    -- ('Tamer')-> Druid, Hunter
-    -- ('Collector') -> Rogue, Mage, Priest
-    -- ('Exorcist') -> Paladin, Priest, 
-    -- ('Feral') ->Druid, Warrior, Hunter 
-    -- ('Holy') -> Paladin, Priest
     CREATE OR REPLACE VIEW special_res AS
     SELECT c.name AS 'class_name',
            r.restriction_id AS 'restrcition_id',
@@ -3023,37 +3005,302 @@ BEGIN
     VALUES
         (
             1,
-            SELECT restriction_id
-            FROM special_res
-            WHERE class_name = 'Hunter'
+            (
+                SELECT restriction_id
+                FROM special_res
+                WHERE class_name = 'Hunter'
+            )
         ),
         (
             2,
-            SELECT restriction_id
-            FROM special_res
-            WHERE class_name = 'Warrior'
+            (
+                SELECT restriction_id
+                FROM special_res
+                WHERE class_name = 'Warrior'
+            )
         ),
         (
             2,
-            SELECT restriction_id
-            FROM special_res
-            WHERE class_name = 'Rogue'
+            (
+                SELECT restriction_id
+                FROM special_res
+                WHERE class_name = 'Rogue'
+            )
         ),
         (
             3,
-            SELECT restriction_id
-            FROM special_res
-            WHERE class_name = 'Mage'
-        )
+            (
+                SELECT restriction_id
+                FROM special_res
+                WHERE class_name = 'Mage'
+            )
+        ),
         (
             3,
-            SELECT restriction_id
-            FROM special_res
-            WHERE class_name = 'Hunter'
+            (
+                SELECT restriction_id
+                FROM special_res
+                WHERE class_name = 'Hunter'
+            )
         ),
-        
-END $$
+        (
+            3,
+            (
+                SELECT restriction_id
+                FROM special_res
+                WHERE class_name = 'Druid'
+            )
+        ),
+        (
+            4,
+            (
+                SELECT restriction_id
+                FROM special_res
+                WHERE class_name = 'Mage'
+            )
+        ),
+        (
+            4,
+            (
+                SELECT restriction_id
+                FROM special_res
+                WHERE class_name = 'Druid'
+            )
+        ),
+        (
+            5,
+            (
+                SELECT restriction_id
+                FROM special_res
+                WHERE class_name = 'Priest'
+            )
+        ),
+        (
+            5,
+            (
+                SELECT restriction_id
+                FROM special_res
+                WHERE class_name = 'Paladin'
+            )
+        ),
+        (
+            5,
+            (
+                SELECT restriction_id
+                FROM special_res
+                WHERE class_name = 'Mage'
+            )
+        ),
+        (
+            6,
+            (
+                SELECT restriction_id
+                FROM special_res
+                WHERE class_name = 'Rogue'
+            )
+        ),
+        (
+            6,
+            (
+                SELECT restriction_id
+                FROM special_res
+                WHERE class_name = 'Mage'
+            )
+        ),
+        (
+            6,
+            (
+                SELECT restriction_id
+                FROM special_res
+                WHERE class_name = 'Druid'
+            )
+        ),
+        (
+            7,
+            (
+                SELECT restriction_id
+                FROM special_res
+                WHERE class_name = 'Warrior'
+            )
+        ),
+        (
+            7,
+            (
+                SELECT restriction_id
+                FROM special_res
+                WHERE class_name = 'Hunter'
+            )
+        ),
+        (
+            7,
+            (
+                SELECT restriction_id
+                FROM special_res
+                WHERE class_name = 'Paladin'
+            )
+        ),
+        (
+            8,
+            (
+                SELECT restriction_id
+                FROM special_res
+                WHERE class_name = 'Priest'
+            )
+        ),
+        (
+            8,
+            (
+                SELECT restriction_id
+                FROM special_res
+                WHERE class_name = 'Paladin'
+            )
+        ),
+        (
+            8,
+            (
+                SELECT restriction_id
+                FROM special_res
+                WHERE class_name = 'Warrior'
+            )
+        ),
+        (
+            9,
+            (
+                SELECT restriction_id
+                FROM special_res
+                WHERE class_name = 'Rogue'
+            )
+        ),
+        (
+            9,
+            (
+                SELECT restriction_id
+                FROM special_res
+                WHERE class_name = 'Hunter'
+            )
+        ),
+        (
+            10,
+            (
+                SELECT restriction_id
+                FROM special_res
+                WHERE class_name = 'Rogue'
+            )
+        ),
+        (
+            10,
+            (
+                SELECT restriction_id
+                FROM special_res
+                WHERE class_name = 'Druid'
+            )
+        ),
+        (
+            10,
+            (
+                SELECT restriction_id
+                FROM special_res
+                WHERE class_name = 'Hunter'
+            )
+        ),
+        (
+            11,
+            (
+                SELECT restriction_id
+                FROM special_res
+                WHERE class_name = 'Druid'
+            )
+        ),
+        (
+            11,
+            (
+                SELECT restriction_id
+                FROM special_res
+                WHERE class_name = 'Hunter'
+            )
+        ),
+        (
+            12,
+            (
+                SELECT restriction_id
+                FROM special_res
+                WHERE class_name = 'Rogue'
+            )
+        ),
+        (
+            12,
+            (
+                SELECT restriction_id
+                FROM special_res
+                WHERE class_name = 'Mage'
+            )
+        ),
+        (
+            12,
+            (
+                SELECT restriction_id
+                FROM special_res
+                WHERE class_name = 'Priest'
+            )
+        ),
+        (
+            13,
+            (
+                SELECT restriction_id
+                FROM special_res
+                WHERE class_name = 'Paladin'
+            )
+        ),
+        (
+            13,
+            (
+                SELECT restriction_id
+                FROM special_res
+                WHERE class_name = 'Priest'
+            )
+        ),
+        (
+            14,
+            (
+                SELECT restriction_id
+                FROM special_res
+                WHERE class_name = 'Druid'
+            )
+        ),
+        (
+            14,
+            (
+                SELECT restriction_id
+                FROM special_res
+                WHERE class_name = 'Warrior'
+            )
+        ),
+        (
+            14,
+            (
+                SELECT restriction_id
+                FROM special_res
+                WHERE class_name = 'Hunter'
+            )
+        ),
+        (
+            15,
+            (
+                SELECT restriction_id
+                FROM special_res
+                WHERE class_name = 'Paladin'
+            )
+        ),
+        (
+            15,
+            (
+                SELECT restriction_id
+                FROM special_res
+                WHERE class_name = 'Priest'
+            )
+        );
 
+END $$
 DELIMITER ;
 
 INSERT INTO races (name, description)
