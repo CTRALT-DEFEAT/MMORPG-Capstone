@@ -1,3 +1,4 @@
+-- Active: 1771873789211@@127.0.0.1@3306@capstone_mmorpg
 USE capstone_mmorpg;
 -- Top 5 characters with most gold earned in the last 30 days.
 
@@ -41,8 +42,41 @@ AND qh.character_id = (
 );
 
 -- Determine(true or false) whether "Thalor" can equip the item  "Axe of the first moon"
-
-SELECT *
-FROM restrictions r
-JOIN item_restrictions ir ON ir.restriction_id = r.restriction_id
-AND ir.item_id = 501;
+SELECT 
+    MIN(
+        CASE 
+            WHEN r.type = 'requirement' THEN
+                CASE 
+                    WHEN (r.class_id IS NOT NULL AND r.class_id != c.class_id) THEN 0
+                    WHEN (r.specialization_id IS NOT NULL AND r.specialization_id != c.specialization_id) THEN 0
+                    WHEN (r.race_id IS NOT NULL AND r.race_id != c.race_id) THEN 0
+                    WHEN (r.level_id IS NOT NULL AND c.level_id < r.level_id) THEN 0
+                    WHEN r.quest_id IS NOT NULL AND r.quest_id NOT IN (
+                        SELECT qh.quest_id 
+                        FROM quest_history qh 
+                        WHERE qh.state = 'completed' AND qh.character_id = c.character_id
+                    ) THEN 0
+                    ELSE 1
+                END
+            WHEN r.type = 'restriction' THEN
+                CASE 
+                    WHEN (r.class_id IS NOT NULL AND r.class_id = c.class_id) THEN 0
+                    WHEN (r.specialization_id IS NOT NULL AND r.specialization_id = c.specialization_id) THEN 0
+                    WHEN (r.race_id IS NOT NULL AND r.race_id = c.race_id) THEN 0
+                    WHEN r.quest_id IS NOT NULL AND r.quest_id IN (
+                        SELECT qh.quest_id 
+                        FROM quest_history qh 
+                        WHERE qh.state = 'completed' AND qh.character_id = c.character_id
+                    ) THEN 0
+                    ELSE 1
+                END
+            ELSE 1
+        END
+    ) AS can_equip
+FROM item_info i
+JOIN item_restrictions ir ON i.info_id = ir.item_id
+JOIN restrictions r ON ir.restriction_id = r.restriction_id
+CROSS JOIN characters c
+WHERE i.info_id = 501 
+AND c.name = 'Thalor'
+GROUP BY c.character_id, i.info_id;
