@@ -1,7 +1,6 @@
--- Active: 1771873789211@@127.0.0.1@3306@capstone_mmorpg
 USE capstone_mmorpg;
--- Top 5 characters with most gold earned in the last 30 days.
 
+-- Top 5 characters with most gold earned in the last 30 days.
 SELECT character_id, SUM(gold) AS total_gold
 FROM (
     SELECT qh.character_id, qr.gold AS gold
@@ -80,3 +79,15 @@ CROSS JOIN characters c
 WHERE i.info_id = 501 
 AND c.name = 'Thalor'
 GROUP BY c.character_id, i.info_id;
+
+-- Which guild has the highest number of active members? Active members have had
+-- at lease one play session lasting 45 minutes or longer in the last 7 day
+SELECT g.guild_id, COUNT(*) AS active_players
+FROM guilds g
+JOIN guild_members gm ON g.guild_id = gm.guild_id
+JOIN member_activity ma ON gm.member_id = ma.member_id
+WHERE ma.day >= DATE_SUB(NOW(), INTERVAL 7 DAY)
+AND TIMESTAMPDIFF(MINUTE,ma.time_played,NOW()) >= 45
+GROUP BY g.guild_id
+ORDER BY active_players DESC
+LIMIT 1;
