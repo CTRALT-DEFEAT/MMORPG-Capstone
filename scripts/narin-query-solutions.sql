@@ -91,3 +91,125 @@ AND TIMESTAMPDIFF(MINUTE,ma.time_played,NOW()) >= 45
 GROUP BY g.guild_id
 ORDER BY active_players DESC
 LIMIT 1;
+
+-- List the top 5 guilds by total experience gained by members 
+-- of the “Officer” or “Guild Leader” rank. Don’t forget to account
+-- for their current level.List the top 5 guilds by total experience 
+-- gained by members of the “Officer” or “Guild Leader” rank.
+SELECT g.guild_id, SUM(c.experience + l.xp_requirement) AS total_xp
+FROM guilds g
+JOIN guild_members gm ON g.guild_id = gm.guild_id
+JOIN characters c ON gm.character_id = c.character_id
+JOIN levels l ON c.level_id = l.level_id
+WHERE gm.role_id IN (
+    SELECT role_id
+    FROM roles
+    WHERE name IN ('officer', 'leader')
+)
+GROUP BY g.guild_id
+ORDER BY total_xp DESC
+LIMIT 5;
+
+-- List the top 5 guilds by total amount of play time in the last year. 
+-- Remember that characters can swap between guilds, and that their play 
+-- time only counts for their current guild when they play.
+SELECT g.guild_id, SUM(ma.time_played) AS total_time
+FROM guilds g
+JOIN guild_members gm ON g.guild_id = gm.guild_id
+JOIN member_activity ma ON gm.member_id = ma.member_id
+WHERE ma.day >= DATE_SUB(NOW(), INTERVAL 1 YEAR)
+GROUP BY g.guild_id
+ORDER BY total_time
+LIMIT 5;
+
+-- List the top 5 items with the highest number of times traded.
+SELECT ii.name, COUNT(i.item_id) AS times_traded
+FROM item_info ii
+JOIN items i ON i.info_id = ii.info_id
+JOIN trade_info ti ON ti.item_id = i.item_id
+GROUP BY ii.info_id
+ORDER BY times_traded DESC
+LIMIT 5;
+
+-- For the quest “Wrath of the Dwarven Lords”, count how many players have 
+-- completed it, count how many players have it in progress (accepted but not completed), 
+-- and count how many players qualify for it (having completed all the prerequisites 
+-- but haven’t accepted it yet).
+SELECT (
+    SELECT COUNT(DISTINCT c.character_id)
+    FROM characters c
+    JOIN quests q ON q.name = 'Wrath of the Dwarven Lords'
+    JOIN quest_restrictions qr ON qr.quest_id = q.quest_id
+    JOIN restrictions r ON r.restriction_id = qr.restriction_id
+    WHERE IF(
+        r.type = 'requirement', 
+        r.level_id IS NULL OR c.level_id >= r.level_id, 
+        r.level_id IS NULL OR c.level_id < r.level_id
+        )
+    AND IF(
+        r.type = 'requirement', 
+        r.class_id IS NULL OR c.class_id = r.class_id, 
+        r.class_id IS NULL OR c.class_id != r.class_id
+        )
+    AND IF(
+        r.type = 'requirement', 
+        r.specialization_id IS NULL OR c.specialization_id = r.specialization_id, 
+        r.specialization_id IS NULL OR c.specialization_id != r.specialization_id
+        )
+    AND IF(
+        r.type = 'requirement', 
+        r.race_id IS NULL OR c.race_id = r.race_id, 
+        r.race_id IS NULL OR c.race_id != r.race_id
+        )
+    AND IF(
+        r.type = 'requirement',
+        r.quest_id IS NULL OR r.quest_id IN(
+            SELECT qh.quest_id
+            FROM quest_history qh
+            WHERE qh.state = 'completed' AND qh.character_id = c.character_id
+        ),
+        r.quest_id IS NULL OR r.quest_id NOT IN(
+            SELECT qh.quest_id
+            FROM quest_history qh
+            WHERE qh.state = 'completed' AND qh.character_id = c.character_id
+        )
+    )
+    AND c.character_id NOT IN (
+        SELECT character_id
+        FROM quest_history qh
+        WHERE quest_id = (
+            SELECT quest_id
+            FROM quests
+            WHERE name = 'Wrath of the Dwarven Lords'
+        )
+        AND qh.state IN ('completed','accepted')
+    )
+) AS can_accept,
+(
+    SELECT COUNT(DISTINCT c.character_id)
+    FROM quest_history qh
+    JOIN quests q ON qh.quest_id = q.quest_id
+    JOIN characters c ON qh.character_id = c.character_id
+    WHERE q.name = 'Wrath of the Dwarven Lords'
+    AND qh.state = 'completed'
+) AS has_completed,
+(
+    SELECT COUNT(DISTINCT c.character_id)
+    FROM quest_history qh
+    JOIN quests q ON qh.quest_id = q.quest_id
+    JOIN characters c ON qh.character_id = c.character_id
+    WHERE q.name = 'Wrath of the Dwarven Lords'
+    AND qh.state = 'accepted'
+    AND c.character_id NOT IN (
+        SELECT character_id
+        FROM quest_history qh
+        WHERE quest_id = (
+            SELECT quest_id
+            FROM quests
+            WHERE name = 'Wrath of the Dwarven Lords'
+        )
+        AND qh.state = 'completed'
+    )
+) AS has_accepted;
+
+
