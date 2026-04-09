@@ -3992,3 +3992,12 @@ CALL gen_specialization_restrictions(
 CALL random_specializations(
 
 );
+
+CALL random_character_chats(
+    1000
+);
+
+CALL gen_chat_filters(
+
+);
+
