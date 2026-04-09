@@ -822,11 +822,15 @@ BEGIN
     DECLARE i INT DEFAULT 1;
     DECLARE char_name VARCHAR(25) DEFAULT 'Thalor';
     DECLARE level INT;
+    DECLARE max_xp INT;
     DECLARE level_count INT;
     SELECT COUNT(*) INTO level_count FROM levels;
 
     WHILE i <= number_of_characters DO
         SET level = FLOOR(1 + RAND()*level_count);
+        SELECT xp_requirement INTO max_xp
+        FROM levels
+        WHERE level_id = level;
 
         INSERT INTO inventories (inventory_id, max_size)
         VALUES (
@@ -840,7 +844,8 @@ BEGIN
             specialization_id, 
             level_id, 
             inventory_id, 
-            gold_balance
+            gold_balance,
+            experience
         )
         VALUES (
             i,
@@ -850,7 +855,8 @@ BEGIN
             1,
             level,
             i,
-            FLOOR(1+ RAND()*45000)
+            FLOOR(1+ RAND()*45000),
+            FLOOR(1+ RAND() * max_xp)
         );
         CALL random_character_info(i);
         CALL random_character_stats(i);
@@ -3032,16 +3038,6 @@ BEGIN
     SELECT COUNT(*) INTO character_count
     FROM characters;
 
-<<<<<<< HEAD
-    WHILE i <= specialization_count DO
-        SET z = 1;
-        SET restriction_amount =
-        FLOOR(min_restrictions + RAND() * max_restrictions);
-        WHILE z <= restriction_amount DO
-            INSERT INTO specialization_restrictions(
-                restriction_id,
-                specialization_id
-=======
     WHILE i <= character_count DO
 
         UPDATE characters
@@ -3056,7 +3052,6 @@ BEGIN
                     FROM characters
                     WHERE character_id = i
                 )
->>>>>>> 4ae1d0cb1e8b012ef93054cef40d41683346e930
             )
             ORDER BY RAND()
             LIMIT 1
