@@ -691,7 +691,62 @@ DROP PROCEDURE IF EXISTS random_quest_rewards;
 DROP PROCEDURE IF EXISTS random_quest_history;
 DROP PROCEDURE IF EXISTS random_mobs;
 DROP PROCEDURE IF EXISTS random_zone_mobs;
+DROP PROCEDURE IF EXISTS gen_member_history;
 DELIMITER $$
+CREATE PROCEDURE IF NOT EXISTS gen_member_history(
+    IN min_history INT,
+    IN max_history INT
+)
+BEGIN
+    DECLARE i INT DEFAULT 1;
+    DECLARE z INT DEFAULT 1;
+    DECLARE member_count INT;
+    DECLARE start_date DATETIME;
+    DECLARE history_count INT;
+    DECLARE member_role INT;
+    SELECT COUNT(*) INTO member_count
+    FROM guild_members;
+
+    WHILE i <= member_count DO
+        SET history_count = min_history + RAND() * max_history;
+        SET z = 1;
+            WHILE z <= history_count DO
+                -- FIX LOGIC, ROLE FORM MEMBER GUILD
+                SELECT role_id INTO member_role
+                FROM roles
+                WHERE name != 'Leader'
+                ORDER BY RAND()
+                LIMIT 1;
+                
+                SELECT ci.creation_date
+                FROM characters c
+                JOIN guild_members gm ON gm.character_id = c.character_id
+                JOIN character_info ci ON ci.character_id = c.character_id
+                WHERE gm.member_id = i;
+
+                
+                CALL random_datetime(
+                    start_date,
+                    NOW(),
+                    @rand_time
+                );
+
+                INSERT INTO member_history(
+                    role_id,
+                    member_id,
+                    time
+                )
+                VALUES(
+                    member_role,
+                    i,
+                    @rand_time
+                );
+                SET z = z + 1;
+            END WHILE;
+        SET i = i + 1;
+    END WHILE;
+END $$
+
 CREATE PROCEDURE IF NOT EXISTS random_datetime(
     IN start_time DATETIME,
     IN end_time DATETIME,
@@ -1201,7 +1256,7 @@ BEGIN
     DECLARE cur_member INT;
     DECLARE member_role INT;
     SET num_of_members 
-    = num_of_members - FLOOR(RAND() * 15);
+    = num_of_members - FLOOR(1 + RAND() * 15);
 
     WHILE i <= num_of_members DO
         SET cur_member = NULL;
@@ -3319,11 +3374,6 @@ CALL new_chat(
     @end_chat
 );
 
-CALL random_message_history(
-    5,
-    13
-);
-
 INSERT INTO regions(
     chat_id,
     name
@@ -3994,10 +4044,22 @@ CALL random_specializations(
 );
 
 CALL random_character_chats(
-    1000
+    500
 );
 
 CALL gen_chat_filters(
 
 );
 
+CALL random_message_history(
+    5,
+    13
+);
+CALL gen_member_history(
+    1,
+    3
+);
+
+SELECT * FROM guild_members;
+SELECT * FROM member_history;
+SELECT * FROM message_history;
