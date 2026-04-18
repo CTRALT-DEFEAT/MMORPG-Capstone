@@ -57,7 +57,7 @@
 >
 > The groups of the ERD
 > | Color     | Group              |
-> | --------- | ------------------ | 
+> | --------- | -------------- | 
 > | Light Pink | Guilds | 
 > | Purple | Chats |  
 > | Dark Green | NPC's/Mobs/Quests | 
@@ -71,4 +71,17 @@
 >
 
 ## Generation Script:
+[The Generation Script](scripts/gen.sql)
+
+> The generaction script starts by creating the database
+> then creates all 51 tables.
+> next we create all 42 procedures for randomly generating data
+> The last section of the generation script is calling all the procedures
+> as well as adding insert statements for data that isnt randomly generated
+> (i.e. classes, races etc)
+
+ADD HIGHLIGHTED SECTIONS
+
+
+
 
