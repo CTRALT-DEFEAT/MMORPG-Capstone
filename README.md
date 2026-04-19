@@ -5,45 +5,73 @@
 ## The Business Needs:
 * Players create characters that belong to their account.
     * Players may have multiple characters.
-    * Characters have attributes like race, class, level, experience, and           specialization.
-        * Specialization is like a “class upgrade”. Not all characters will             have one, but the ones they’re allowed to select are dependent on             their class.
+    * Characters have attributes like race, class, level, experience, and
+      specialization.
+        * Specialization is like a “class upgrade”. Not all characters will
+          have one, but the ones they’re allowed to select are dependent on
+          their class.
         * Characters may only have up to one specialization.
-        * There is some specialization overlap. Characters with the “Hunter”            or “Warrior” class are both allowed to choose the “Ranger”                    specialization, but Hunters aren’t allowed to choose the                      “Berserker” specialization because it’s only available to Warriors.
+        * There is some specialization overlap. Characters with the “Hunter”
+          or “Warrior” class are both allowed to choose the “Ranger”
+          specialization, but Hunters aren’t allowed to choose the
+          “Berserker” specialization because it’s only available to Warriors.
 * Characters can belong to a guild.
     * Guilds have names, messages of the day, and ranks.
-    * All guilds have a “Guild leader” rank, which can only be held by one          member.
-    * The other ranks are “Officer”, “Member”, and “Recruit”. Any number of         guild members can have these ranks.
+    * All guilds have a “Guild leader” rank, which can only be held by one
+      member.
+    * The other ranks are “Officer”, “Member”, and “Recruit”. Any number of
+      guild members can have these ranks.
     * Guild membership and rank history should be preserved.
-* Characters gain experience points (XP) through game play, which is used to    determine their level.
+* Characters gain experience points (XP) through game play, which is used to
+  determine their level.
     * Each level has a fixed amount of XP required to attain the next level.
     * XP is earned through quests and combat.
-    * Each XP-gaining activity should be tracked as a timestamped event for         auditing purposes.
+    * Each XP-gaining activity should be tracked as a timestamped event for
+      auditing purposes.
 * Quests can be accepted and completed by characters.
-    * (For purposes of simplicity, you may assume that the only possible            quest states are “unaccepted”, “accepted”, and “completed”. If you want       to expand that list to include others such as “failed”, “repeatable”,         or others, you may but there’s no extra credit for it.)
+    * (For purposes of simplicity, you may assume that the only possible
+      quest states are “unaccepted”, “accepted”, and “completed”. If you want
+      to expand that list to include others such as “failed”, “repeatable”,
+      or others, you may but there’s no extra credit for it.)
     * Quests have names and descriptions.
-    * To accept a quest, the character may have had to complete one or more         other quests first.
+    * To accept a quest, the character may have had to complete one or more
+      other quests first.
     * All quests are dispensed by a Non-Player-Character (NPC).
         * NPCs have names and coordinates for their location.
     * Quests may have rewards (XP and/or gold and/or items).
 
 * Characters collect and equip items.
-    * Items may be equipped into specific “equipment slots”, such as “head”,        “chest”, “legs”, or “main hand”.
-    * Items have a current and maximum durability. The current durability may       never exceed the maximum. Current durability is consumed through item         usage (such as combat).
-    * Items may have one or more requirements and/or restrictions to equip,         such as having a specific race, class, specialization, minimum or             maximum level.
-    * Sample requirement: “Pendant of Avarice” may only be equipped by              characters of the Goblin race.
-    * Sample restriction: “Holy Sword” may not be equipped by players with          the Necromancer class or Death Knight specialization.
+    * Items may be equipped into specific “equipment slots”, such as “head”,
+      “chest”, “legs”, or “main hand”.
+    * Items have a current and maximum durability. The current durability may
+      never exceed the maximum. Current durability is consumed through item
+      usage (such as combat).
+    * Items may have one or more requirements and/or restrictions to equip,
+      such as having a specific race, class, specialization, minimum or
+      maximum level.
+    * Sample requirement: “Pendant of Avarice” may only be equipped by
+      caracters of the Goblin race.
+    * Sample restriction: “Holy Sword” may not be equipped by players with
+      the Necromancer class or Death Knight specialization.
       Items cannot be equipped if they have zero current durability.
 * Items can be traded between characters or sold to NPCs.
-    * All items have a fixed price that an NPC will pay for it. All NPCs pay        the same amount.
-    * The game stores a complete record of trade history for all items: an          items’ entire ownership history should be traceable from its creation         to its disappearance.
-    * Items can come from quests as rewards, from slain enemies as loot, or         purchased from NPCs.
+    * All items have a fixed price that an NPC will pay for it. All NPCs pay
+      the same amount.
+    * The game stores a complete record of trade history for all items: an
+      items’ entire ownership history should be traceable from its creation
+      to its disappearance.
+    * Items can come from quests as rewards, from slain enemies as loot, or
+      purchased from NPCs.
 * Gold is a currency in the game. It is a non-negative whole number.
     * Players may earn it from quest rewards, slain monster loot, or trade.
     * Players may spend it on item repairs or trade.
     * All transactions must be recorded.
 * Players may send chat messages.
-    * Chat messages may be direct from player to player or sent to multi-           player channels such as “guild chat” or “everyone currently in the city       of Urdia”.
-    * A complete history of chat messages must be kept and easily searchable        for offensive or abusive content.
+    * Chat messages may be direct from player to player or sent to multi-
+      player channels such as “guild chat” or “everyone currently in the city
+      of Urdia”.
+    * A complete history of chat messages must be kept and easily searchable
+      for offensive or abusive content.
 
 ## The ERD:
 > With the set of business needs as a guide our first task was to design and
@@ -169,13 +197,14 @@ AND qh.character_id = (
     WHERE name = 'Thalor'
 );
 ```
-* Determine (true or false) whether “Thalor” can equip the item “Axe of the    First Moon”.
+* Determine (true or false) whether “Thalor” can equip
+  the item “Axe of the First Moon”.
 ```MySQL
 SELECT 
-    MIN(
+    MIN( -- Uses min function so if any return 0 the query is false.
         CASE 
-            WHEN r.type = 'requirement' THEN
-                CASE 
+            WHEN r.type = 'requirement' THEN -- Goes through requirements first
+                CASE -- Returns 0 if the character doesnt meet any of the requirements
                     WHEN (r.class_id IS NOT NULL AND r.class_id != c.class_id) THEN 0
                     WHEN (r.specialization_id IS NOT NULL AND r.specialization_id != c.specialization_id) THEN 0
                     WHEN (r.race_id IS NOT NULL AND r.race_id != c.race_id) THEN 0
@@ -185,10 +214,10 @@ SELECT
                         FROM quest_history qh 
                         WHERE qh.state = 'completed' AND qh.character_id = c.character_id
                     ) THEN 0
-                    ELSE 1
+                    ELSE 1 -- Returns 1 if all requirements are met.
                 END
-            WHEN r.type = 'restriction' THEN
-                CASE 
+            WHEN r.type = 'restriction' THEN -- goes through restrictions
+                CASE -- Returns 0 if the character has a restricted attribute
                     WHEN (r.class_id IS NOT NULL AND r.class_id = c.class_id) THEN 0
                     WHEN (r.specialization_id IS NOT NULL AND r.specialization_id = c.specialization_id) THEN 0
                     WHEN (r.race_id IS NOT NULL AND r.race_id = c.race_id) THEN 0
@@ -197,40 +226,44 @@ SELECT
                         FROM quest_history qh 
                         WHERE qh.state = 'completed' AND qh.character_id = c.character_id
                     ) THEN 0
-                    ELSE 1
+                    ELSE 1 -- Returns 1 if the character has no restricted attributes
                 END
-            ELSE 1
+            ELSE 1 -- returns 1 if item has no requirements, or restrictions
         END
     ) AS can_equip
 FROM item_info i
 JOIN item_restrictions ir ON i.info_id = ir.item_id
 JOIN restrictions r ON ir.restriction_id = r.restriction_id
 CROSS JOIN characters c
-WHERE i.info_id = 501 
+WHERE i.info_id = 501
 AND c.name = 'Thalor'
 GROUP BY c.character_id, i.info_id;
 ```
-* Which guild has the highest number of active members?  Active members have   had at least one play session lasting 45 minutes or longer in the last 7     days.
+* Which guild has the highest number of active members? Active members
+  have had at least one play session lasting 45 minutes or longer in
+  the last 7 days
 ```MySQL
 SELECT g.guild_id, COUNT(*) AS active_players
 FROM guilds g
 JOIN guild_members gm ON g.guild_id = gm.guild_id
 JOIN member_activity ma ON gm.member_id = ma.member_id
 WHERE ma.day >= DATE_SUB(NOW(), INTERVAL 7 DAY)
-AND TIMESTAMPDIFF(MINUTE,ma.time_played,NOW()) >= 45
+AND TIMESTAMPDIFF(MINUTE,ma.time_played,NOW()) >= 45 -- Checks if time_played is at least 45 minutes.
 GROUP BY g.guild_id
 ORDER BY active_players DESC
 LIMIT 1;
 ```
-* List the top 5 guilds by total experience gained by members of the           “Officer” or “Guild Leader” rank. Don’t forget to account for their          current level.
+* List the top 5 guilds by total experience gained by members of the
+  “Officer” or “Guild Leader” rank. Don’t forget to account for their
+  current level.
 ```MySQL
 SELECT gm.guild_id as guild,
     SUM(
     (
-    SELECT SUM(xp_requirement) 
-    FROM levels l2
+    SELECT SUM(xp_requirement)       -- Gets the required xp for each level the
+    FROM levels l2                   -- character has gone through.
     WHERE l2.level_id <= c.level_id
-    )
+    )                               
     ) AS total_guild_xp
 FROM characters c
 JOIN guild_members gm
@@ -241,7 +274,9 @@ WHERE gm.role_id = 3
 ORDER BY total_guild_xp DESC
 LIMIT 5;
 ```
-* List the top 5 guilds by total amount of play time in the last year.         Remember that characters can swap between guilds, and that their play time    only counts for their current guild when they play.
+* List the top 5 guilds by total amount of play time in the last year.
+  Remember that characters can swap between guilds, and that their play time
+  only counts for their current guild when they play.
 ```MySQL
 SELECT g.guild_id, SUM(ma.time_played) AS total_time
 FROM guilds g
