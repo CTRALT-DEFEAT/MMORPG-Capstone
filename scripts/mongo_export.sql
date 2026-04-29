@@ -499,3 +499,353 @@ INTO OUTFILE 'C:\\data\\_exports\\chats.jsonl'
 LINES TERMINATED BY '\n';
 
 
+-- narin solutions
+-- Sets filepath
+SET @file_path = '/mysql/capstone/';
+
+
+-- Using prepared statements
+-- Trades
+SET @trade_export = CONCAT(
+    "SELECT JSON_OBJECT(
+        'trade_info', ti.info_id,
+        
+        'player_trades', JSON_OBJECT(
+            'sender_id', pt.sender_id,
+            'reciever_id', pt.reciever_id
+        ),
+
+        'npc_trades', JSON_OBJECT(
+            'character_id', nt.character_id,
+            'npc_id', nt.npc_id
+        ),
+
+        'item_id', ti.item_id,
+        'gold', ti.gold,
+        'time', ti.time
+    )
+    AS trade_data
+    FROM trade_info ti
+    JOIN player_trades pt
+        ON pt.trade_id = ti.info_id
+    JOIN npc_trades nt
+        ON nt.trade_id = ti.info_id
+    INTO OUTFILE '", @file_path, 'trades.jsonl', "' ",
+    "LINES TERMINATED BY '\n'"
+);
+
+
+-- Characters
+SET @character_export = CONCAT(
+    "SELECT JSON_OBJECT(
+        'character_info_id', ci.character_id,
+        'active', IF(ci.active = 1, 'True', 'False'),
+        'creation_date', ci.creation_date,
+        'last_played', ci.last_played,
+        'time_played', ci.time_plated,
+
+        'character_attributes', JSON_OBJECT(
+            'name', c.name,
+            'gold_balance', c.gold_balance,
+            'experience', c.experience,
+
+            'class', JSON_OBJECT(
+                'class_id', cl.class_id,
+                'name', cl.name,
+                'description', 'cl,description'
+            ),
+
+            'specialization', JSON_OBJECT(
+                'specialization_id', s.specialization_id,
+                'name', s.name
+            ),
+
+            'race', JSON_OBJECT(
+                'race_id', r.race_id,
+                'name', r.name,
+                'description', r.description
+            ),
+
+            'level', JSON_OBJECT(
+                'level_id', l.level_id,
+                'xp_requirement', l.xp_requirement
+            ),
+            'inventory', JSON_OBJECT(
+                'inventory_id', i.inventory_id,
+                'max_size', i.max_size
+            ),
+        ),
+        'account', JSON_OBJECT(
+            'account_id', a.account_id,
+            'name', a.username,
+            'creation_date', a.creation_date,
+            'max_characters', a.max_characters,
+            'current_characters', a.current_characters,
+
+            'account_history', JSON_OBJECT(
+                'history_id', ah.history_id,
+                'log_on', ah.log_on,
+                'log_off', ah.log_off
+            )
+        )
+    )
+    AS account_character_attributes
+    FROM character_info ci
+    JOIN accounts a
+        ON a.account_id = ci.account_id
+    JOIN account_history ah
+        ON ah.account_id = a.account_id
+    JOIN characters c
+        ON c.character_id = ci.character_id
+    JOIN classes cl
+        ON cl.class_id = c.class_id
+    JOIN specializations s
+        ON s.specialization_id = c.specialization_id
+    JOIN races r
+        ON r.race_id = c.race_id
+    JOIN levels l
+        ON l.level_id = c.level_id
+    JOIN inventories i
+        ON i.inventory_id = c.inventory_id
+    INTO OUTFILE '", @file_path, 'characters.jsonl', ", ",
+    "LINES TERMINATED BY '\n'"
+);
+
+-- Combats
+SET @combat_export = CONCAT(
+    "SELECT JSON_OBJECT(
+        'combat_id', c.combat_id,
+        'character_id', c.character_id,
+        'mob_id', c.mob_id,
+
+        'combat_info', JSON_OBJECT(
+            'info_id', ci.info_id,
+            'time', ci.time,
+            'result', ci.result
+        ),
+        'combat_equiptment', JSON_OBJECT(
+            'equipped_id', ce.equipped_id,
+            'durability_lost', ce.durability_lost
+        )
+    ) AS combats
+    FROM combats c
+    JOIN combat_info ci
+        ON ci.combat_id = c.combat_id
+    JOIN combat_equipment ce
+        ON ce.combat_id = c.combat_id
+    INTO OUTFILE '", @file_path, 'combats.jsonl', ", ",
+    "LINES TERMINATED BY '\n'"
+);
+
+-- Zones
+SET @zone_export = CONCAT(
+    "SELECT JSON_OBJECT(
+        'zone_id', z.zone_id,
+        'name', z.name,
+        'zone_mobs', JSON_OBJECT(
+            'mob_id', zm.mob_id,
+            'amount', zm.amount
+        ),
+
+        'region', JSON_OBJECT(
+            'region_id', r.region_id,
+            'name', r.name,
+            'chat_id', r.chat_id,
+            'faction', JSON_OBJECT(
+                'faction_id', f.faction_id,
+                'name', f.name
+            )
+        )
+    )
+    AS zones
+    FROM zones z
+    JOIN regions r
+        ON r.region_id = z.region_id
+    JOIN factions f
+        ON f.region_id = z.region_id
+    JOIN zone_mobs zm
+        ON zm.zone_id = z.zone_id
+    INTO OUTFILE '", @file_path, 'zones.jsonl', ", ",
+    "LINES TERMINATED BY '\n'"
+);
+
+-- Items
+SET @item_export = CONCAT(
+    "SELECT JSON_OBJECT(
+        'info_id', ii.info_id,
+        'name', ii.name,
+        'durability_max', ii.durability_max,
+        'sell_price', ii.sell_price,
+        'repair_cost', ii.repair_cost,
+        'two_handed', IF(ii.two_handed, 'True', 'False'),
+
+        'item_rarity', JSON_OBJECT(
+            'rarity_id', r.rarity_id,
+            'name', r.name,
+            'color', r.color
+        ),
+        
+        'quest_rewards', JSON_OBJECT(
+            'reward_id', qr.reward_id,
+            'item_id', qr.item_id, 
+            'quest_id', qr.quest_id,
+            'gold', qr.gold,
+            'experience', qr.experience
+        ),
+        
+        'loot_table_items', JSON_OBJECT(
+            'item_id', lti.item_id, 
+            'drop_rate', lti.drop_rate,
+            
+            'loot_table', JSON_OBJECT(
+                'loot_table_id', lt.loot_table_id,
+                'min_gold', lt.min_gold,
+                'max_gold', lt.max_gold,
+                'min_exp', lt.min_exp,
+                'max_exp', lt.max_exp
+            )
+        ),
+        
+        'items', JSON_OBJECT(
+            'item_id', i.item_id,
+            'inventory_id', i.inventory_id
+        )
+    )
+    AS items
+    FROM item_info ii
+    JOIN item_rarities r
+        ON r.rarity_id = ii.rarity_id
+    JOIN items i
+        ON i.info_id = ii.info_id
+    JOIN quest_rewards qr
+        ON qr.item_id = ii.info_id
+    JOIN loot_table_items lti
+        ON lti.item_id = ii.info_id
+    JOIN loot_tables lt
+        ON lt.loot_table_id = lti.loot_table_id
+    INTO OUTFILE '", @file_path, 'items.jsonl', "' ",
+    "LINES TERMINATED BY '\n'"
+);
+
+-- Restrictions
+SET @restriction_export = CONCAT(
+    "SELECT JSON_OBJECT(
+        'restriction_id', r.restriction_id,
+        'class_id', r.class_id,
+        'specialization_id', r.specialization_id,
+        'race_id', r.race_id,
+        'level_id',  r.level_id,
+        'quest_id', r.quest_id,
+        'type', r.type,
+
+        'specialization_restrictions', JSON_OBJECT(
+            'specializatoin_id', sr.specialization_id
+        ),
+        
+        'item_restrictions', JSON_OBJECT(
+            'item_id', ir.item_id
+        ),
+        
+        'quest_restrictions', JSON_OBJECT(
+            'quest_id', qr.quest_id
+        )
+    )
+    AS restriction_data
+    FROM restrictions r
+    JOIN specialization_restrictions sr
+        ON sr.restriction_id = r.restriction_id
+    JOIN item_restrictions ir
+        ON ir.restriction_id = r.restriction_id
+    JOIN quest_restrictions qr
+        ON qr.restriction_id = r.restriction_id
+    INTO OUTFILE '", @file_path, 'restrictions.jsonl', " '",
+    "LINES TERMINATED BY '\n'"
+);
+
+-- Modifiers
+SET @modifier_export = CONCAT(
+    "SELECT JSON_OBJECT(
+        'modifier_id', m.modifier_id,
+        'stat_id', m.stat_id,
+        'type', m.type,
+
+        'class_modifiers', JSON_OBJECT(
+            'class_id', cm.class_id
+        ),
+        
+        'specialization_modifiers', JSON_OBJECT(
+            'specialization_id', sm.specialization_id
+        ),
+
+        'race_modifiers', JSON_OBJECT(
+            'race_id', rm.race_id
+        ),
+
+        'item_modifiers', JSON_OBJECT(
+            'item_id', im.item_id
+        )
+    )
+    AS modifier_data
+    FROM modifier m
+    JOIN class_modifiers cm
+        ON cm.modifier_id = m.modifier_id
+    JOIN specialization_modifiers sm
+        ON sm.modifier_id = m.modifier_id
+    JOIN race_modifiers
+        ON rm.modifier_id = m.modifier_id
+    JOIN item_modifiers
+        ON im.modifier_id = m.modifier_id
+    INTO OUTFILE '", @file_path, 'modifiers.jsonl', ", ",
+    "LINES TERMINATED BY '\n'"
+);
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+-- Executes
+
+-- Trades
+PREPARE stmt FROM @trade_export;
+EXECUTE stmt;
+DEALLOCATE PREPARE stmt;
+
+-- Characters
+PREPARE stmt FROM @character_export;
+EXECUTE stmt;
+DEALLOCATE PREPARE stmt;
+
+-- Combats
+PREPARE stmt FROM @combat_export;
+EXECUTE stmt;
+DEALLOCATE PREPARE stmt;
+
+-- Zones
+PREPARE stmt FROM @zone_export;
+EXECUTE stmt;
+DEALLOCATE PREPARE stmt;
+
+-- Items
+PREPARE stmt FROM @item_export;
+EXECUTE stmt;
+DEALLOCATE PREPARE stmt;
+
+-- Restrictions
+PREPARE stmt FROM @restriction_export;
+EXECUTE stmt;
+DEALLOCATE PREPARE stmt;
+
+-- Modifiers
+PREPARE stmt FROM @modifier_export;
+EXECUTE stmt;
+DEALLOCATE PREPARE stmt;
+
