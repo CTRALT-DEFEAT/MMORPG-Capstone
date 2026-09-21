@@ -1,79 +1,82 @@
 # MMORPG-Capstone
+>
 > The projects goal was to create a MySQL database modeled after a
 > massively multiplayer online role-playing game (MMORPG).
 
-## The Business Needs:
+## The Business Needs
+
 * Players create characters that belong to their account.
-    * Players may have multiple characters.
-    * Characters have attributes like race, class, level, experience, and
+  * Players may have multiple characters.
+  * Characters have attributes like race, class, level, experience, and
       specialization.
-        * Specialization is like a “class upgrade”. Not all characters will
+    * Specialization is like a “class upgrade”. Not all characters will
           have one, but the ones they’re allowed to select are dependent on
           their class.
-        * Characters may only have up to one specialization.
-        * There is some specialization overlap. Characters with the “Hunter”
+    * Characters may only have up to one specialization.
+    * There is some specialization overlap. Characters with the “Hunter”
           or “Warrior” class are both allowed to choose the “Ranger”
           specialization, but Hunters aren’t allowed to choose the
           “Berserker” specialization because it’s only available to Warriors.
 * Characters can belong to a guild.
-    * Guilds have names, messages of the day, and ranks.
-    * All guilds have a “Guild leader” rank, which can only be held by one
+  * Guilds have names, messages of the day, and ranks.
+  * All guilds have a “Guild leader” rank, which can only be held by one
       member.
-    * The other ranks are “Officer”, “Member”, and “Recruit”. Any number of
+  * The other ranks are “Officer”, “Member”, and “Recruit”. Any number of
       guild members can have these ranks.
-    * Guild membership and rank history should be preserved.
+  * Guild membership and rank history should be preserved.
 * Characters gain experience points (XP) through game play, which is used to
   determine their level.
-    * Each level has a fixed amount of XP required to attain the next level.
-    * XP is earned through quests and combat.
-    * Each XP-gaining activity should be tracked as a timestamped event for
+  * Each level has a fixed amount of XP required to attain the next level.
+  * XP is earned through quests and combat.
+  * Each XP-gaining activity should be tracked as a timestamped event for
       auditing purposes.
 * Quests can be accepted and completed by characters.
-    * (For purposes of simplicity, you may assume that the only possible
+  * (For purposes of simplicity, you may assume that the only possible
       quest states are “unaccepted”, “accepted”, and “completed”. If you want
       to expand that list to include others such as “failed”, “repeatable”,
       or others, you may but there’s no extra credit for it.)
-    * Quests have names and descriptions.
-    * To accept a quest, the character may have had to complete one or more
+  * Quests have names and descriptions.
+  * To accept a quest, the character may have had to complete one or more
       other quests first.
-    * All quests are dispensed by a Non-Player-Character (NPC).
-        * NPCs have names and coordinates for their location.
-    * Quests may have rewards (XP and/or gold and/or items).
+  * All quests are dispensed by a Non-Player-Character (NPC).
+    * NPCs have names and coordinates for their location.
+  * Quests may have rewards (XP and/or gold and/or items).
 
 * Characters collect and equip items.
-    * Items may be equipped into specific “equipment slots”, such as “head”,
+  * Items may be equipped into specific “equipment slots”, such as “head”,
       “chest”, “legs”, or “main hand”.
-    * Items have a current and maximum durability. The current durability may
+  * Items have a current and maximum durability. The current durability may
       never exceed the maximum. Current durability is consumed through item
       usage (such as combat).
-    * Items may have one or more requirements and/or restrictions to equip,
+  * Items may have one or more requirements and/or restrictions to equip,
       such as having a specific race, class, specialization, minimum or
       maximum level.
-    * Sample requirement: “Pendant of Avarice” may only be equipped by
+  * Sample requirement: “Pendant of Avarice” may only be equipped by
       caracters of the Goblin race.
-    * Sample restriction: “Holy Sword” may not be equipped by players with
+  * Sample restriction: “Holy Sword” may not be equipped by players with
       the Necromancer class or Death Knight specialization.
       Items cannot be equipped if they have zero current durability.
 * Items can be traded between characters or sold to NPCs.
-    * All items have a fixed price that an NPC will pay for it. All NPCs pay
+  * All items have a fixed price that an NPC will pay for it. All NPCs pay
       the same amount.
-    * The game stores a complete record of trade history for all items: an
+  * The game stores a complete record of trade history for all items: an
       items’ entire ownership history should be traceable from its creation
       to its disappearance.
-    * Items can come from quests as rewards, from slain enemies as loot, or
+  * Items can come from quests as rewards, from slain enemies as loot, or
       purchased from NPCs.
 * Gold is a currency in the game. It is a non-negative whole number.
-    * Players may earn it from quest rewards, slain monster loot, or trade.
-    * Players may spend it on item repairs or trade.
-    * All transactions must be recorded.
+  * Players may earn it from quest rewards, slain monster loot, or trade.
+  * Players may spend it on item repairs or trade.
+  * All transactions must be recorded.
 * Players may send chat messages.
-    * Chat messages may be direct from player to player or sent to multi-
+  * Chat messages may be direct from player to player or sent to multi-
       player channels such as “guild chat” or “everyone currently in the city
       of Urdia”.
-    * A complete history of chat messages must be kept and easily searchable
+  * A complete history of chat messages must be kept and easily searchable
       for offensive or abusive content.
 
-## The ERD:
+## The ERD
+>
 > With the set of business needs as a guide our first task was to design and
 > create an ERD to base our database off of.
 
@@ -84,21 +87,23 @@
 > lines being the same as the parent tables.
 >
 > The groups of the ERD
-> | Color     | Group              |
-> | --------- | -------------- | 
-> | Light Pink | Guilds | 
+>
+> | Color | Group |
+> | --------- | -------------- |
+> | Light Pink | Guilds |
 > | Purple | Chats |  
-> | Dark Green | NPC's/Mobs/Quests | 
+> | Dark Green | NPC's/Mobs/Quests |
 > | Light Green | Regions/Zones/Factions |
 > | Gold | Items/Loot_Tables/Rewards |  
 > | Orange | Trades |
-> | Brown | Restrictions | 
-> | Light Purple | Modifiers | 
-> | Turquoise | Combat | 
-> | Blue |Accounts/Characters/Character_Attributes |
+> | Brown | Restrictions |
+> | Light Purple | Modifiers |
+> | Turquoise | Combat |
+> | Blue | Accounts/Characters/Character_Attributes |
 >
 
-## Generation Script:
+## Generation Script
+
 [The Generation Script](scripts/gen.sql)
 
 > The generation script starts by creating the database
@@ -110,10 +115,67 @@
 
 ADD HIGHLIGHTED SECTIONS
 
-## Query Challenges:
+* The procedure used for generating all date-time related data.
+
+```MySQL
+CREATE PROCEDURE IF NOT EXISTS random_datetime(
+    IN start_time DATETIME,
+    IN end_time DATETIME,
+    OUT random_date DATETIME)
+BEGIN
+    SET random_date = FROM_UNIXTIME(
+        UNIX_TIMESTAMP(start_time) + FLOOR(
+            RAND() * (UNIX_TIMESTAMP(end_time) - UNIX_TIMESTAMP(start_time))
+        )
+    );
+END $$
+```
+
+* An example of the random_datetime procedure being used.
+
+```MySQL
+
+CREATE PROCEDURE IF NOT EXISTS random_account_history (
+    IN acc_id INT,
+    IN history_count INT)
+BEGIN
+    DECLARE i INT DEFAULT 1;
+    DECLARE start_date DATE;
+    DECLARE off_time DATETIME;
+    DECLARE newest_time DATETIME;
+
+    -- Ensures any account history doesnt occure before
+    -- the accounts creation_date by using the creation_date
+    -- as the low end of the random date.
+    SELECT creation_date INTO start_date FROM accounts
+    WHERE acc_id = account_id;
+
+    WHILE i <= history_count DO
+        SELECT log_off INTO newest_time FROM account_history
+        WHERE account_id = acc_id
+        ORDER BY log_off DESC LIMIT 1;
+
+        CAll random_datetime(
+            IF(newest_time IS NULL, start_date, newest_time), 
+            NOW(),
+            @log_on_time
+        );
+        SET off_time = DATE_ADD(@log_on_time, INTERVAL FLOOR(RAND() * 86400)SECOND);
+
+        INSERT INTO account_history(account_id, log_on, log_off)
+        VALUES(acc_id, @log_on_time, off_time);
+
+        SET i = i + 1;
+    END WHILE;
+END $$
+```
+
+## Query Challenges
+>
 > The final step of the project was to complete 10 queries.
 
-#### List the top 5 characters with the most gold earned in the last 30 days.
+#### List the top 5 characters with the most gold earned in the last 30 days
+
 ```MySQL
 -- A view containing all gold sources
 DROP VIEW IF EXISTS gold_sources_view;
@@ -185,7 +247,9 @@ GROUP BY c.character_id, c.name
 ORDER BY gold_earned DESC
 LIMIT 5;
 ```
+
 * Show names of all the quests completed by the character “Thalor”.
+
 ```MySQL
 SELECT q.name
 FROM quests q
@@ -197,8 +261,10 @@ AND qh.character_id = (
     WHERE name = 'Thalor'
 );
 ```
+
 * Determine (true or false) whether “Thalor” can equip
   the item “Axe of the First Moon”.
+
 ```MySQL
 SELECT 
     MIN( -- Uses min function so if any return 0 the query is false.
@@ -239,9 +305,11 @@ WHERE i.info_id = 501
 AND c.name = 'Thalor'
 GROUP BY c.character_id, i.info_id;
 ```
+
 * Which guild has the highest number of active members? Active members
   have had at least one play session lasting 45 minutes or longer in
   the last 7 days
+
 ```MySQL
 SELECT g.guild_id, COUNT(*) AS active_players
 FROM guilds g
@@ -253,9 +321,11 @@ GROUP BY g.guild_id
 ORDER BY active_players DESC
 LIMIT 1;
 ```
+
 * List the top 5 guilds by total experience gained by members of the
   “Officer” or “Guild Leader” rank. Don’t forget to account for their
   current level.
+
 ```MySQL
 SELECT gm.guild_id as guild,
     SUM(
@@ -274,9 +344,11 @@ WHERE gm.role_id = 3
 ORDER BY total_guild_xp DESC
 LIMIT 5;
 ```
+
 * List the top 5 guilds by total amount of play time in the last year.
   Remember that characters can swap between guilds, and that their play time
   only counts for their current guild when they play.
+
 ```MySQL
 SELECT g.guild_id, SUM(ma.time_played) AS total_time
 FROM guilds g
@@ -287,7 +359,9 @@ GROUP BY g.guild_id
 ORDER BY total_time
 LIMIT 5;
 ```
+
 * List the top 5 items with the highest number of times traded.
+
 ```MySQL
 SELECT ii.name, COUNT(i.item_id) AS times_traded
 FROM item_info ii
@@ -297,7 +371,9 @@ GROUP BY ii.info_id
 ORDER BY times_traded DESC
 LIMIT 5;
 ```
+
 * For the quest “Wrath of the Dwarven Lords”, count how many players have      completed it, count how many players have it in progress (accepted but not   completed), and count how many players qualify for it (having completed      all the prerequisites but haven’t accepted it yet).
+
 ```MySQL
 SELECT (
     SELECT COUNT(DISTINCT c.character_id)
@@ -376,7 +452,9 @@ SELECT (
     )
 ) AS has_accepted;
 ```
+
 * List the 5 most popular class & specialization combinations.
+
 ```MySQL
 SELECT 
     cl.name,
@@ -393,7 +471,9 @@ GROUP BY
 ORDER BY popularity DESC
 LIMIT 5;
 ```
+
 * Pick an offensive or abusive word (I’m sure you can think of a few).         Identify users that sent messages using this word.
+
 ```MySQL
 SELECT 
     c.name AS character_name
@@ -402,8 +482,5 @@ JOIN characters c
     ON c.character_id = mh.sender_id
 WHERE mh.message LIKE '%ass%';
 ```
+
 [Query Solutions](scripts/submit_queries.sql)
-
-
-
-
