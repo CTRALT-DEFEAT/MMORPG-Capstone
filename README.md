@@ -262,8 +262,7 @@ AND qh.character_id = (
 );
 ```
 
-* Determine (true or false) whether “Thalor” can equip
-  the item “Axe of the First Moon”.
+#### Determine (true or false) whether “Thalor” can equip the item “Axe of the First Moon”
 
 ```MySQL
 SELECT 
@@ -306,9 +305,7 @@ AND c.name = 'Thalor'
 GROUP BY c.character_id, i.info_id;
 ```
 
-* Which guild has the highest number of active members? Active members
-  have had at least one play session lasting 45 minutes or longer in
-  the last 7 days
+#### Which guild has the highest number of active members? Active members have had at least one play session lasting 45 minutes or longer in the last 7 days
 
 ```MySQL
 SELECT g.guild_id, COUNT(*) AS active_players
@@ -322,9 +319,7 @@ ORDER BY active_players DESC
 LIMIT 1;
 ```
 
-* List the top 5 guilds by total experience gained by members of the
-  “Officer” or “Guild Leader” rank. Don’t forget to account for their
-  current level.
+#### List the top 5 guilds by total experience gained by members of the “Officer” or “Guild Leader” rank. Don’t forget to account for their current level
 
 ```MySQL
 SELECT gm.guild_id as guild,
@@ -345,9 +340,7 @@ ORDER BY total_guild_xp DESC
 LIMIT 5;
 ```
 
-* List the top 5 guilds by total amount of play time in the last year.
-  Remember that characters can swap between guilds, and that their play time
-  only counts for their current guild when they play.
+#### List the top 5 guilds by total amount of play time in the last year. Remember that characters can swap between guilds, and that their play time only counts for their current guild when they play
 
 ```MySQL
 SELECT g.guild_id, SUM(ma.time_played) AS total_time
@@ -360,7 +353,7 @@ ORDER BY total_time
 LIMIT 5;
 ```
 
-* List the top 5 items with the highest number of times traded.
+#### List the top 5 items with the highest number of times traded
 
 ```MySQL
 SELECT ii.name, COUNT(i.item_id) AS times_traded
@@ -372,7 +365,7 @@ ORDER BY times_traded DESC
 LIMIT 5;
 ```
 
-* For the quest “Wrath of the Dwarven Lords”, count how many players have      completed it, count how many players have it in progress (accepted but not   completed), and count how many players qualify for it (having completed      all the prerequisites but haven’t accepted it yet).
+#### For the quest “Wrath of the Dwarven Lords”, count how many players have      completed it, count how many players have it in progress (accepted but not   completed), and count how many players qualify for it (having completed      all the prerequisites but haven’t accepted it yet)
 
 ```MySQL
 SELECT (
@@ -453,7 +446,7 @@ SELECT (
 ) AS has_accepted;
 ```
 
-* List the 5 most popular class & specialization combinations.
+#### List the 5 most popular class & specialization combinations
 
 ```MySQL
 SELECT 
@@ -472,7 +465,7 @@ ORDER BY popularity DESC
 LIMIT 5;
 ```
 
-* Pick an offensive or abusive word (I’m sure you can think of a few).         Identify users that sent messages using this word.
+#### Pick an offensive or abusive word (I’m sure you can think of a few). Identify users that sent messages using this word
 
 ```MySQL
 SELECT 
