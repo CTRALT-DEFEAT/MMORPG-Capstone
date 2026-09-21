@@ -248,7 +248,7 @@ ORDER BY gold_earned DESC
 LIMIT 5;
 ```
 
-* Show names of all the quests completed by the character “Thalor”.
+#### Show names of all the quests completed by the character “Thalor”
 
 ```MySQL
 SELECT q.name
